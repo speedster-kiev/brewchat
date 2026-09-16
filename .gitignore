@@ -1,0 +1,22 @@
+# Raw supplier catalog exports (real inventory/pricing, no data-use agreement yet)
+*_all_products_*.json
+*_product_example.json
+
+# Environment and secrets
+.env
+.env.*
+*.key
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node
+node_modules/
+dist/
+build/
+
+# OS
+.DS_Store
