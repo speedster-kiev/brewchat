@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from typing import Any
 
+from brewchat.catalog.pack import PackSize, parse_pack_size
+
 
 @dataclass(frozen=True)
 class Product:
@@ -30,6 +32,10 @@ class Product:
 
     def price(self, include_vat: bool) -> float:
         return self.price_with_vat if include_vat else self.price_without_vat
+
+    def pack_size(self) -> PackSize | None:
+        # Derived from the title, not stored: the cache keeps the raw title.
+        return parse_pack_size(self.title)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

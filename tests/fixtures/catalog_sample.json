@@ -670,6 +670,66 @@
    "PacketId": null
   },
   {
+   "Id": 121,
+   "ItemNumber": "HC-0121",
+   "Title": "Maris Otter Malt - Northfield Maltings, ebc 5 - 7, pr. 100 g.",
+   "CategoryId": 6,
+   "SecondaryCategoryIds": [],
+   "CategoryTitle": "Malt",
+   "Stock": 40,
+   "StockWithoutReservation": 40,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 2.5,
+     "PriceMinWithVat": 2.5,
+     "PriceMinWithoutVat": 2.0,
+     "FullPriceMinWithVat": 2.5,
+     "FullPriceMinWithoutVat": 2.0
+    }
+   ],
+   "Handle": "/shop/6-malt/121-maris-otter-malt-northfield-maltings-ebc-5-7-pr-100-g/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 122,
+   "ItemNumber": "HC-0122",
+   "Title": "Maris Otter Malt - Northfield Maltings, ebc 5 - 7, pr. 25 kg.",
+   "CategoryId": 263,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Hele 25 kg. maltsaekke",
+   "Stock": 40,
+   "StockWithoutReservation": 40,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 425.0,
+     "PriceMinWithVat": 425.0,
+     "PriceMinWithoutVat": 340.0,
+     "FullPriceMinWithVat": 425.0,
+     "FullPriceMinWithoutVat": 340.0
+    }
+   ],
+   "Handle": "/shop/263-hele-25-kg-maltsaekke/122-maris-otter-malt-northfield-maltings-ebc-5-7-pr-25-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
    "Id": 201,
    "ItemNumber": "HC-0201",
    "Title": "Centennial hop pellets, 100 g, alpha 9,5%",
@@ -818,6 +878,37 @@
     }
    ],
    "Handle": "/shop/51-amerikanske-humle-pellets/205-citra-hop-pellets-100-g-alpha-12-5/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 221,
+   "ItemNumber": "HC-0221",
+   "Title": "Citra hop pellets US, alpha 12,5% 300 g.",
+   "CategoryId": 51,
+   "SecondaryCategoryIds": [
+    "7"
+   ],
+   "CategoryTitle": "Amerikanske humle pellets",
+   "Stock": 40,
+   "StockWithoutReservation": 40,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 170.0,
+     "PriceMinWithVat": 170.0,
+     "PriceMinWithoutVat": 136.0,
+     "FullPriceMinWithVat": 170.0,
+     "FullPriceMinWithoutVat": 136.0
+    }
+   ],
+   "Handle": "/shop/51-amerikanske-humle-pellets/221-citra-hop-pellets-us-alpha-12-5-300-g/",
    "Link": null,
    "Url": null,
    "DateCreated": "2025-01-01T00:00:00",

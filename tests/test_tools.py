@@ -106,3 +106,20 @@ def test_tool_without_session_is_tool_error(tools):
         tools["submit_parsed_recipe"].call({"ingredients": [
             {"type": "hop", "name": "Saaz", "amount": 30, "unit": "g"},
         ]})
+
+
+def test_build_order_list_reports_recalculated_quantities(tools, session):
+    out = tools["build_order_list"].call({"items": [{
+        "ingredient": {"type": "fermentable", "name": "Maris Otter", "amount": 5, "unit": "kg"},
+        "product_handle": "/shop/6-malt/121-maris-otter-malt-northfield-maltings-ebc-5-7-pr-100-g/",
+        "quantity": 1, "source": "matched",
+    }]})
+    assert out.startswith("Quantities recalculated from pack sizes")
+    assert "- Maris Otter: quantity 1 -> 50 (5 kg needed, sold per 100 g)" in out
+    assert out.endswith(session.order_list.text)
+
+
+def test_search_candidates_carry_pack_size(tools, session):
+    out = json.loads(tools["search_catalog"].call({"query": "Maris Otter", "ingredient_type": "fermentable"}))
+    sizes = {c["handle"].split("/")[3][:3]: c["pack_size"] for c in out["candidates"]}
+    assert sizes["121"] == "100 g" and sizes["122"] == "25 kg"

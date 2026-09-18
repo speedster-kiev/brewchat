@@ -33,7 +33,13 @@ class Substitution(BaseModel):
 class OrderListItem(BaseModel):
     ingredient: Ingredient
     product_handle: str | None = None
-    quantity: float = Field(gt=0, description="Number of catalog units (packs/bags) to buy.")
+    quantity: float = Field(
+        gt=0,
+        description=(
+            "Number of catalog units to buy. Recalculated from ingredient.amount when the product has a "
+            "weight or volume pack_size, so it only decides for per-pack items such as yeast."
+        ),
+    )
     source: Source
     substitution: Substitution | None = None
 
@@ -60,6 +66,8 @@ class OrderLine(BaseModel):
     product_handle: str | None
     url: str | None
     quantity: float
+    pack_size: str | None = None  # e.g. "100 g": what one unit of quantity stands for
+    quantity_requested: float | None = None  # the agent's quantity, set only when code corrected it
     unit_price: float | None
     line_total: float | None
     in_stock: bool | None

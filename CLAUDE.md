@@ -13,6 +13,7 @@ uv run pytest tests/test_order_list.py::test_name    # single test
 uv run pre-commit run --all-files                    # supplier anonymization guard
 uv run scripts/sync_catalog.py                       # fetch catalog -> data/catalog.sqlite (needs local config)
 uv run scripts/check_categories.py <raw export.json> # per-category counts vs the category map
+uv run scripts/check_pack_sizes.py                   # pack sizes parsed from cached titles
 uv run scripts/export_logs.py                        # substitution log JSONL -> CSV
 uv run uvicorn brewchat.web.app:app
 uv run python scripts/run_evals.py parse|adversarial [--only ID] [--judge]   # live API, by hand only
@@ -44,6 +45,7 @@ Web (`web/`): `create_app(settings, runner)`; module-level `app` is created lazi
 
 - `system-prompt.md` is the runtime source of the prompt: `agent/prompt.py` reads the fenced block under "## The prompt" and fills `{{supplier_name}}`, `{{currency}}`, `{{vat_note}}`, `{{cache_timestamp}}`. Editing that doc changes the live prompt; re-run the whole adversarial eval set after any prompt change, not just the failing fixture.
 - Shop specifics (category ids → ingredient type, exclusions, endpoints, VAT flag) live in `config/supplier.example.toml` / the local TOML, not code. Filtering: primary `CategoryId` mapped, else a mapped secondary category unless the primary is in `exclude_categories`.
+- Pack size lives in the title ("pr. 100 g.", "pr. 25 kg.", "100 g"), parsed by `catalog/pack.py` (`Product.pack_size()`); the price is per one such unit. `build_order_list` recomputes `quantity` from the recipe amount whenever the units are comparable (mass/volume, via `brewchat/units.py`, shared with the eval scorer) and only trusts the model's quantity for per-pack items. `search.normalize()` strips the same sizes for scoring only. `uv run scripts/check_pack_sizes.py` audits the parse against the real cache.
 - In-stock = `StockWithoutReservation > 0 and Buyable and not Soldout`. `Online` is deliberately ignored (false on every real product). `Handle` is already a full path, so link = `base_url.rstrip('/') + handle`; `Prices` is a single-element list.
 - `OrderList.cache_timestamp` / `TurnResult.cache_timestamp` are ISO 8601; the human-readable sentence is rendered separately.
 - Unit tests use the synthetic catalog `tests/fixtures/catalog_sample.json` via `conftest.py` fixtures (`settings`, `catalog_cache`) with tmp paths; the Anthropic client is always faked. Evals (`brewchat/evals.py` holds the pure scoring/verdict logic) also run against the synthetic catalog, so they never need the real config. Scoring conventions are in `evals/README.md`.

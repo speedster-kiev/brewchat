@@ -25,6 +25,7 @@ from brewchat.agent.models import (
     OrderListItem,
 )
 from brewchat.agent.session import Session, current_session
+from brewchat.catalog.pack import units_needed
 from brewchat.catalog.search import CatalogIndex
 from brewchat.config import Settings
 from brewchat.logs.session_log import SessionLog
@@ -67,6 +68,31 @@ def _fmt_money(v: float, currency: str) -> str:
 def format_cache_timestamp(ts: datetime) -> str:
     utc = ts.astimezone(UTC) if ts.tzinfo else ts.replace(tzinfo=UTC)
     return f"Stock and prices as of {utc:%Y-%m-%d %H:%M} UTC; stock may have changed since."
+
+
+def _fmt_amount(amount: float, unit: str) -> str:
+    return f"{_fmt_qty(amount)} {unit}".strip()
+
+
+def _bought(line: OrderLine) -> str:
+    """ "; buying 50 x 100 g = 5 kg" for lines sold by weight or volume, else ""."""
+    if not line.pack_size:
+        return ""
+    amount_str, unit = line.pack_size.split(" ", 1)
+    total = float(amount_str) * line.quantity
+    if unit in ("g", "ml") and total >= 1000:
+        total, unit = total / 1000, {"g": "kg", "ml": "l"}[unit]
+    return f"; buying {_fmt_qty(line.quantity)} x {line.pack_size} = {_fmt_amount(round(total, 3), unit)}"
+
+
+def quantity_notes(order: OrderList) -> list[str]:
+    """One line per quantity the code recalculated from the pack size."""
+    return [
+        f"{line.ingredient_name}: quantity {_fmt_qty(line.quantity_requested)} -> {_fmt_qty(line.quantity)}"
+        f" ({_fmt_amount(line.ingredient_amount, line.ingredient_unit)} needed, sold per {line.pack_size})"
+        for line in order.items
+        if line.quantity_requested is not None
+    ]
 
 
 def _source_label(line: OrderLine) -> str:
@@ -133,7 +159,7 @@ def render_text(order: OrderList, supplier_name: str, cache_line: str) -> str:
         )
         stock = "" if line.in_stock else " (out of stock at last sync)"
         out.append(f"{n}. [{label}] {_fmt_qty(line.quantity)} x {line.product_title}{stock}, {price}")
-        out.append(f"   For: {line.ingredient_name} ({need})")
+        out.append(f"   For: {line.ingredient_name} ({need}){_bought(line)}")
         if line.substitution and line.source == "substituted":
             out.append(f"   Why: {line.substitution.reason} (confidence: {line.substitution.confidence})")
         out.append(f"   Link: {line.url}")
@@ -187,6 +213,8 @@ def build_order_list_impl(ctx: ToolContext, session: Session, items: list[OrderL
             ))
             continue
         unit_price = product.price(include_vat)
+        pack = product.pack_size()
+        quantity = units_needed(it.ingredient.amount, it.ingredient.unit, pack) or it.quantity
         lines.append(OrderLine(
             ingredient_name=it.ingredient.name,
             ingredient_amount=it.ingredient.amount,
@@ -195,9 +223,11 @@ def build_order_list_impl(ctx: ToolContext, session: Session, items: list[OrderL
             product_title=product.title,
             product_handle=product.handle,
             url=base_url + product.handle,
-            quantity=it.quantity,
+            quantity=quantity,
+            pack_size=pack.label if pack else None,
+            quantity_requested=None if quantity == it.quantity else it.quantity,
             unit_price=unit_price,
-            line_total=round(unit_price * it.quantity, 2),
+            line_total=round(unit_price * quantity, 2),
             in_stock=product.in_stock(),
             substitution=it.substitution,
         ))
@@ -256,7 +286,8 @@ def make_tools(ctx: ToolContext) -> list:
 
         Titles embed the spec text (EBC colour, alpha acid %, yeast strain), so read them the way a
         brewer would. Each candidate has handle, title, score (0-100, higher is closer), in_stock,
-        stock, price and ingredient_type. Out-of-stock products ARE returned, flagged
+        stock, price, pack_size and ingredient_type. price is for one unit of pack_size (e.g. "100 g"
+        or "25 kg"); pack_size null means the price is per pack. Out-of-stock products ARE returned, flagged
         in_stock=false, so you can see the right product exists but cannot be ordered: never put an
         out-of-stock product on the list without saying so. To substitute, search again for the
         substitute (by name, style or spec) and use only a handle this tool returned. An explicit
@@ -283,9 +314,11 @@ def make_tools(ctx: ToolContext) -> list:
         """Build the final shopping list with links, prices and total; returns the text to show the user.
 
         One item per recipe ingredient (merge repeated additions of the same product into one item
-        with the summed quantity). quantity is the number of catalog units (packs, bags) to buy,
-        not the recipe amount: e.g. 4.5 kg of malt sold in 1 kg bags is 5; 60 g of a hop sold in
-        100 g packs is 1. product_handle must be a handle returned by search_catalog.
+        whose ingredient.amount is the summed amount). quantity is the number of catalog units to
+        buy, not the recipe amount: e.g. 4.5 kg of malt sold "pr. 100 g" is 45, in 25 kg sacks is 1;
+        60 g of a hop sold in 100 g packs is 1. For products with a weight or volume pack_size the
+        tool recalculates quantity from ingredient.amount and unit, so keep those accurate; your
+        quantity is used as given only for per-pack items such as yeast. product_handle must be a handle returned by search_catalog.
         source: "matched" = the recipe's own product; "substituted" = your substitute, which the
         user accepted; "user_override" = a product the user chose instead; "unavailable" = no
         product (e.g. the user rejected the substitute) - leave product_handle null, the line is
@@ -297,6 +330,14 @@ def make_tools(ctx: ToolContext) -> list:
             items: One entry per recipe ingredient, with the chosen product and quantity.
         """
         order = build_order_list_impl(ctx, _session(), items)
-        return order.text
+        notes = quantity_notes(order)
+        if not notes:
+            return order.text
+        return (
+            "Quantities recalculated from pack sizes (already applied in the list below):\n"
+            + "\n".join(f"- {n}" for n in notes)
+            + "\n\n"
+            + order.text
+        )
 
     return [_report_validation_errors(t) for t in (submit_parsed_recipe, search_catalog, build_order_list)]

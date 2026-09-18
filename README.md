@@ -35,7 +35,7 @@ brewchat/
   agent/             models, tools, system prompt rendering, tool-runner loop
   logs/              substitution log (JSONL), session timing (SQLite), CSV export
   web/               FastAPI app, passphrase gate, single-page chat UI
-scripts/             sync_catalog, check_categories, export_logs, run_evals
+scripts/             sync_catalog, check_categories, check_pack_sizes, export_logs, run_evals
 tests/               unit tests, no network and no API key needed
 evals/               live-model evals and the measurement protocol
 ```
@@ -64,7 +64,7 @@ uv run scripts/sync_catalog.py                     # fetch the catalog once (one
 uv run uvicorn brewchat.web.app:app --reload       # then open http://localhost:8000
 ```
 
-The sync keeps the previous cache and exits non-zero if the fetch fails or the response changes shape. To re-check the ingredient category map against a raw export: `uv run scripts/check_categories.py path/to/export.json`.
+The sync keeps the previous cache and exits non-zero if the fetch fails or the response changes shape. To re-check the ingredient category map against a raw export: `uv run scripts/check_categories.py path/to/export.json`. To see which pack size ("pr. 100 g.", "25 kg", "100 g") was read from each cached title, and which titles have none: `uv run scripts/check_pack_sizes.py`.
 
 ## Test and evaluate
 

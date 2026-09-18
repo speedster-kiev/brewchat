@@ -133,3 +133,60 @@ def test_out_of_stock_product_is_flagged_in_text(ctx):
     order = build_order_list_impl(ctx, Session(), [galaxy])
     assert order.items[0].in_stock is False
     assert "out of stock" in order.text
+
+
+# -- pack sizes (issue #2) ------------------------------------------------------
+
+MO_100G = "/shop/6-malt/121-maris-otter-malt-northfield-maltings-ebc-5-7-pr-100-g/"
+MO_25KG = "/shop/263-hele-25-kg-maltsaekke/122-maris-otter-malt-northfield-maltings-ebc-5-7-pr-25-kg/"
+CITRA_300G = "/shop/51-amerikanske-humle-pellets/221-citra-hop-pellets-us-alpha-12-5-300-g/"
+
+
+def _item(name, amount, unit, handle, quantity, type_="fermentable") -> OrderListItem:
+    return OrderListItem.model_validate({
+        "ingredient": {"type": type_, "name": name, "amount": amount, "unit": unit},
+        "product_handle": handle, "quantity": quantity, "source": "matched",
+    })
+
+
+def test_priced_per_100_g_quantity_is_recalculated(ctx):
+    # The bug from issue #2: the agent treats "pr. 100 g." as a bag and orders 1.
+    order = build_order_list_impl(ctx, Session(), [_item("Maris Otter", 5, "kg", MO_100G, 1)])
+    line = order.items[0]
+    assert line.quantity == 50
+    assert line.pack_size == "100 g"
+    assert line.quantity_requested == 1
+    assert line.line_total == pytest.approx(125.0)  # 50 * 2.50
+    assert order.total == pytest.approx(125.0)
+    assert "[matched] 50 x Maris Otter Malt" in order.text
+    assert "For: Maris Otter (5 kg); buying 50 x 100 g = 5 kg" in order.text
+
+
+def test_25_kg_sack_is_not_multiplied_by_kilos(ctx):
+    # The mirror bug: quantity given in kilos for a per-sack price.
+    order = build_order_list_impl(ctx, Session(), [_item("Maris Otter", 20, "kg", MO_25KG, 20)])
+    line = order.items[0]
+    assert line.quantity == 1 and line.quantity_requested == 20
+    assert line.line_total == pytest.approx(425.0)
+    assert "buying 1 x 25 kg = 25 kg" in order.text
+
+
+@pytest.mark.parametrize(("amount", "handle", "expected"), [
+    (40, CITRA, 1), (250, CITRA, 3), (250, CITRA_300G, 1),
+])
+def test_hop_packs_rounded_up(ctx, amount, handle, expected):
+    order = build_order_list_impl(ctx, Session(), [_item("Citra", amount, "g", handle, 1, "hop")])
+    assert order.items[0].quantity == expected
+
+
+def test_correct_quantity_is_not_flagged(ctx):
+    order = build_order_list_impl(ctx, Session(), [_item("Maris Otter", 5, "kg", MO_100G, 50)])
+    assert order.items[0].quantity == 50 and order.items[0].quantity_requested is None
+
+
+def test_per_pack_items_keep_the_agents_quantity(ctx):
+    # "1 pack" of an 11,5 g sachet can't be compared, so the agent's 2 stands.
+    order = build_order_list_impl(ctx, Session(), [_item("US-05", 1, "pack", US05, 2, "yeast")])
+    line = order.items[0]
+    assert line.quantity == 2 and line.quantity_requested is None
+    assert line.line_total == pytest.approx(79.5)

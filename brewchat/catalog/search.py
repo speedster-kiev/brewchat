@@ -121,5 +121,6 @@ class CatalogIndex:
             "in_stock": p.in_stock(),
             "stock": p.stock_without_reservation,
             "price": p.price(self.include_vat),
+            "pack_size": pack.label if (pack := p.pack_size()) else None,
             "ingredient_type": p.ingredient_type,
         }

@@ -6,7 +6,7 @@ from brewchat.catalog.search import CatalogIndex, normalize
 from brewchat.catalog.sync import filter_and_project, write_cache
 from tests.conftest import SAMPLE_FETCHED_AT
 
-CANDIDATE_KEYS = {"handle", "title", "score", "in_stock", "stock", "price", "ingredient_type"}
+CANDIDATE_KEYS = {"handle", "title", "score", "in_stock", "stock", "price", "pack_size", "ingredient_type"}
 
 
 @pytest.fixture
@@ -81,12 +81,16 @@ def test_get_by_handle_and_cache_timestamp(index):
 
 
 def test_reloads_when_fetched_at_changes(settings, sample_raw, catalog_cache, index):
-    assert index.search("Citra", ingredient_type="hop")[0]["in_stock"] is True
+    def citra_100g() -> dict:
+        hits = index.search("Citra", ingredient_type="hop", limit=20)
+        return next(r for r in hits if r["handle"].split("/")[3].startswith("205-"))
+
+    assert citra_100g()["in_stock"] is True
     for p in sample_raw["products"]:
         if p["Id"] == 205:
             p["Soldout"] = True
             p["StockWithoutReservation"] = 0
     later = datetime(2026, 9, 18, 6, 0, tzinfo=UTC)
     write_cache(filter_and_project(sample_raw, settings), catalog_cache, later)
-    assert index.search("Citra", ingredient_type="hop")[0]["in_stock"] is False
+    assert citra_100g()["in_stock"] is False
     assert index.cache_timestamp == later
