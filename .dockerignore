@@ -1,0 +1,10 @@
+.git
+.venv
+data
+logs
+evals/results
+config/*.local.toml
+*_all_products_*.json
+*_product_example.json
+__pycache__
+.env

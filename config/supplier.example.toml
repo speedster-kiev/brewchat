@@ -1,0 +1,75 @@
+# BrewChat supplier configuration: committed placeholder copy.
+#
+# Copy to config/supplier.local.toml (gitignored) and fill in the real shop.
+# Everything supplier-identifying lives in the local copy only; code, docs,
+# tests and logs use the placeholder "HopCellar" / hopcellar.example.
+#
+# The two endpoints are the shop platform's unauthenticated product JSON
+# endpoints (this file replaces the old supplier-api.md note):
+#   {base_url}/json/products/all       full catalog, one call, used by the daily sync
+#   {base_url}/json/products/id/{id}   one product, useful for spot checks only
+
+[supplier]
+name = "HopCellar"              # placeholder, used in UI copy and logs
+base_url = "https://hopcellar.example"
+products_all_path = "/json/products/all"
+product_by_id_path = "/json/products/id/{id}"
+currency = "DKK"
+prices_include_vat = true       # unconfirmed, see intent.md open questions
+user_agent = "BrewChat catalog sync (personal project)"
+
+[sync]
+schedule = "daily"
+cache_path = "data/catalog.sqlite"
+
+# CategoryId -> ingredient type. Only products in these categories reach the
+# agent. Shop-specific, so it lives here and not in code. Expanded from the
+# spec's first-pass list after checking the July export (plan.md, finding 2).
+# NOT yet confirmed with the supplier. Re-check after each sync with
+#   uv run scripts/check_categories.py <raw export>
+# A product whose primary category is unmapped is still included if one of its
+# secondary categories is mapped, unless its primary is in exclude_categories.
+[categories]
+# fermentables
+"6" = "fermentable"     # Malt
+"34" = "fermentable"    # Karamel malt
+"36" = "fermentable"    # Hvede malt
+"37" = "fermentable"    # Special malt
+"39" = "fermentable"    # Okologisk malt
+"64" = "fermentable"    # Div. flager (oats, maize, wheat, rice)
+"263" = "fermentable"   # Hele 25 kg. maltsaekke
+"286" = "fermentable"   # Pilsner malt
+"287" = "fermentable"   # Pale ale malt
+"288" = "fermentable"   # Munich malt
+"289" = "fermentable"   # Vienna malt
+"290" = "fermentable"   # Spraymalt
+"312" = "fermentable"   # Rog malt (smoked)
+"329" = "fermentable"   # Sukker og spraymalt
+# hops
+"7" = "hop"             # Humle
+"46" = "hop"            # Amerikansk humle
+"48" = "hop"            # Europaeiske humler
+"50" = "hop"            # Humle pellets
+"51" = "hop"            # Amerikanske humle pellets
+"52" = "hop"            # Britiske humler
+"53" = "hop"            # Europaeiske humler
+"54" = "hop"            # Australsk humle
+"55" = "hop"            # New Zealand
+"103" = "hop"           # Okologisk humle
+"268" = "hop"           # Humle pellets 300 g
+# yeast
+"8" = "yeast"           # Gaer
+"68" = "yeast"          # White Labs liquid yeast
+"78" = "yeast"          # Dry yeast (Mangrove Jack, Fermentis, Lallemand)
+"281" = "yeast"         # Dry yeast 500 g
+"282" = "yeast"         # Lallemand dry yeast
+"317" = "yeast"         # Kveik
+# other: sugars, spices, water minerals
+"19" = "other"          # Tilsaetning - krydderier, sukker, sirup
+"74" = "other"          # Krydderier
+"272" = "other"         # Mineraler - tilsaetning til vand
+"328" = "other"         # Sirup
+
+[exclude_categories]
+# Primary categories never included via a secondary-category match.
+ids = [137]             # Distillation yeast: tagged "yeast" but not for beer

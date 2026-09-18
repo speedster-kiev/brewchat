@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>BrewChat</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #f7f5f0; --panel: #ffffff; --fg: #1f1d1a; --muted: #6b655a; --line: #e2dccf;
+  --accent: #9a5b13; --accent-fg: #ffffff; --user: #f1e6d3; --bot: #ffffff;
+  --ok: #2e7d32; --warn: #a15c00; --bad: #b3261e; --info: #1c5fa8;
+  --radius: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15140f; --panel: #1f1d17; --fg: #ece8df; --muted: #a39c8e; --line: #36322a;
+    --accent: #e0a24e; --accent-fg: #1a1408; --user: #3a2f1f; --bot: #1f1d17;
+    --ok: #7cc784; --warn: #f0b35a; --bad: #f28b82; --info: #8ab4f8;
+  }
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+header {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--panel);
+}
+header h1 { margin: 0; font-size: 1.1rem; }
+header .sub { color: var(--muted); font-size: .85rem; }
+header button { font: inherit; font-size: .85rem; }
+main {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+  gap: 16px; padding: 16px; max-width: 1280px; margin: 0 auto; height: calc(100% - 57px);
+}
+@media (max-width: 900px) {
+  main { grid-template-columns: minmax(0, 1fr); height: auto; }
+}
+.chat { display: flex; flex-direction: column; min-height: 0; }
+#messages {
+  flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
+  padding: 4px 2px 12px; min-height: 240px;
+}
+.msg {
+  max-width: 88%; padding: 10px 14px; border-radius: var(--radius);
+  border: 1px solid var(--line); white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.msg.user { align-self: flex-end; background: var(--user); }
+.msg.bot { align-self: flex-start; background: var(--bot); }
+.msg.err { align-self: flex-start; border-color: var(--bad); color: var(--bad); background: transparent; }
+.msg.thinking { color: var(--muted); font-style: italic; }
+.dots::after { content: ""; animation: dots 1.4s steps(4, end) infinite; }
+@keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+.empty { color: var(--muted); margin: auto; text-align: center; max-width: 34em; padding: 24px; }
+form.composer {
+  display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--line);
+  border-radius: var(--radius); background: var(--panel); padding: 10px;
+}
+textarea {
+  width: 100%; min-height: 120px; max-height: 45vh; resize: vertical; font: inherit;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92rem;
+  color: inherit; background: transparent; border: 0; outline: none; padding: 4px;
+}
+.row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.hint { color: var(--muted); font-size: .8rem; }
+button {
+  font: inherit; font-weight: 600; cursor: pointer; border-radius: 8px;
+  border: 1px solid var(--line); background: transparent; color: inherit; padding: 6px 12px;
+}
+button.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); padding: 8px 18px; }
+button:disabled { opacity: .55; cursor: default; }
+aside {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 14px; overflow-y: auto; min-height: 0; display: flex; flex-direction: column; gap: 10px;
+}
+aside h2 { margin: 0; font-size: 1rem; }
+.placeholder { color: var(--muted); font-size: .9rem; }
+ul.items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+ul.items li { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.line-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.ingredient { font-weight: 600; }
+.price { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.product { margin-top: 2px; overflow-wrap: anywhere; }
+.product a { color: var(--info); }
+.meta { color: var(--muted); font-size: .85rem; font-variant-numeric: tabular-nums; }
+.sub { font-size: .85rem; margin-top: 4px; }
+.badge {
+  display: inline-block; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
+  padding: 1px 7px; border-radius: 999px; border: 1px solid currentColor; margin-right: 6px; vertical-align: 1px;
+}
+.b-matched { color: var(--ok); } .b-substituted { color: var(--warn); }
+.b-user_override { color: var(--info); } .b-unavailable { color: var(--bad); }
+.oos { color: var(--bad); font-weight: 600; }
+.total { display: flex; justify-content: space-between; font-weight: 700; border-top: 1px solid var(--line); padding-top: 8px; }
+.note { font-size: .88rem; }
+.footer { color: var(--muted); font-size: .8rem; }
+</style>
+</head>
+<body>
+<header>
+  <div><h1>BrewChat</h1><div class="sub">Paste a beer recipe, get a priced shopping list from the shop's catalog.</div></div>
+  <div class="row">
+    <button type="button" id="new-chat" title="Start a new conversation">New chat</button>
+    <form method="post" action="/logout"><button type="submit">Log out</button></form>
+  </div>
+</header>
+<main>
+  <section class="chat">
+    <div id="messages" aria-live="polite">
+      <div class="empty" id="empty">Paste your recipe (grain bill, hops, yeast, anything else) and I'll match each ingredient to a real product, suggest substitutes where needed, and build a shopping list.</div>
+    </div>
+    <form class="composer" id="composer">
+      <textarea id="input" placeholder="Paste a recipe or ask a question..." aria-label="Message" required></textarea>
+      <div class="row">
+        <span class="hint">Enter to send, Shift+Enter for a new line</span>
+        <button class="primary" type="submit" id="send">Send</button>
+      </div>
+    </form>
+  </section>
+  <aside id="order" aria-label="Order list">
+    <h2>Order list</h2>
+    <div class="placeholder" id="order-empty">Your list appears here once a recipe has been matched.</div>
+    <div id="order-body" hidden>
+      <ul class="items" id="items"></ul>
+      <div class="total" style="margin-top:10px"><span>Total</span><span class="price" id="total"></span></div>
+      <div class="meta" id="vat"></div>
+      <p class="note" id="handoff"></p>
+      <div class="row">
+        <button type="button" id="copy">Copy as text</button>
+        <span class="hint" id="copied" hidden>Copied</span>
+      </div>
+    </div>
+    <div class="footer" id="cache-ts"></div>
+  </aside>
+</main>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const messages = $("messages"), input = $("input"), send = $("send");
+  const KEY = "brewchat.session_id";
+  let sessionId = null, orderText = "", busy = false;
+  try { sessionId = sessionStorage.getItem(KEY); } catch (e) {}
+
+  function saveSession(id) {
+    sessionId = id || null;
+    try { id ? sessionStorage.setItem(KEY, id) : sessionStorage.removeItem(KEY); } catch (e) {}
+  }
+
+  function addMsg(kind, text) {
+    const empty = $("empty"); if (empty) empty.remove();
+    const div = document.createElement("div");
+    div.className = "msg " + kind;
+    div.textContent = text;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+    return div;
+  }
+
+  function fmtTs(ts) {
+    if (!ts) return "";
+    const d = new Date(ts);
+    return isNaN(d) ? ts : d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+  }
+
+  function money(v, cur) {
+    if (v === null || v === undefined) return "n/a";
+    return Number(v).toFixed(2) + " " + cur;
+  }
+
+  function el(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  const LABELS = { matched: "matched", substituted: "substituted", user_override: "your choice", unavailable: "unavailable" };
+
+  function renderOrder(ol) {
+    const items = $("items"); items.replaceChildren();
+    for (const it of ol.items) {
+      const li = el("li");
+      const top = el("div", "line-top");
+      const name = el("span", "ingredient");
+      name.appendChild(el("span", "badge b-" + it.source, LABELS[it.source] || it.source));
+      name.appendChild(document.createTextNode(it.ingredient_name));
+      top.appendChild(name);
+      top.appendChild(el("span", "price", it.line_total == null ? "" : money(it.line_total, ol.currency)));
+      li.appendChild(top);
+
+      const prod = el("div", "product");
+      if (it.product_title) {
+        if (it.url) {
+          const a = el("a", "", it.product_title);
+          a.href = it.url; a.target = "_blank"; a.rel = "noopener noreferrer";
+          prod.appendChild(a);
+        } else prod.textContent = it.product_title;
+      } else prod.textContent = "Not available from the catalog: source elsewhere.";
+      li.appendChild(prod);
+
+      const meta = el("div", "meta");
+      const parts = ["Recipe: " + it.ingredient_amount + " " + it.ingredient_unit];
+      if (it.product_title) parts.push("Qty " + it.quantity + " × " + money(it.unit_price, ol.currency));
+      meta.textContent = parts.join("  ·  ");
+      if (it.in_stock === false) { meta.appendChild(document.createTextNode("  ·  ")); meta.appendChild(el("span", "oos", "out of stock")); }
+      li.appendChild(meta);
+
+      if (it.substitution) {
+        const s = it.substitution;
+        li.appendChild(el("div", "sub", "Replaces " + s.original_name + " (" + s.confidence + " confidence): " + s.reason));
+      }
+      items.appendChild(li);
+    }
+    $("total").textContent = money(ol.total, ol.currency);
+    $("vat").textContent = ol.vat_note || "";
+    $("handoff").textContent = ol.handoff_note || "";
+    orderText = ol.text || "";
+    $("order-empty").hidden = true;
+    $("order-body").hidden = false;
+  }
+
+  function setCacheTs(ts) {
+    $("cache-ts").textContent = ts ? "Catalog snapshot: " + fmtTs(ts) + ". Stock may have changed since." : "";
+  }
+
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text || busy) return;
+    busy = true; send.disabled = true;
+    addMsg("user", text);
+    input.value = "";
+    const pending = addMsg("bot thinking", "");
+    pending.innerHTML = '<span class="dots">Thinking</span>';
+    const started = Date.now();
+    const timer = setInterval(() => {
+      const s = Math.round((Date.now() - started) / 1000);
+      if (s >= 10) pending.firstChild.textContent = "Thinking (" + s + "s, matching ingredients can take a minute)";
+    }, 1000);
+    try {
+      const res = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ session_id: sessionId, message: text }),
+      });
+      if (res.status === 401) { window.location.href = "/login"; return; }
+      let data = null;
+      try { data = await res.json(); } catch (e) {}
+      pending.remove();
+      if (data && data.session_id) saveSession(data.session_id);
+      if (!res.ok || !data || data.error) {
+        const msg = (data && typeof data.error === "string") ? data.error
+          : res.status === 422 ? "That message couldn't be sent (empty or too long)." : "Something went wrong. Please try again.";
+        addMsg("err", msg);
+        input.value = input.value || text;
+        return;
+      }
+      addMsg("bot", data.reply);
+      if (data.order_list) renderOrder(data.order_list);
+      setCacheTs(data.cache_timestamp);
+    } catch (e) {
+      pending.remove();
+      addMsg("err", "Network error. Check your connection and try again.");
+      input.value = input.value || text;
+    } finally {
+      clearInterval(timer);
+      busy = false; send.disabled = false;
+      input.focus();
+    }
+  }
+
+  $("composer").addEventListener("submit", (e) => { e.preventDefault(); sendMessage(); });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); sendMessage(); }
+  });
+
+  $("copy").addEventListener("click", async () => {
+    if (!orderText) return;
+    try { await navigator.clipboard.writeText(orderText); }
+    catch (e) {
+      const ta = document.createElement("textarea");
+      ta.value = orderText; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); } finally { ta.remove(); }
+    }
+    const c = $("copied"); c.hidden = false; setTimeout(() => { c.hidden = true; }, 1500);
+  });
+
+  $("new-chat").addEventListener("click", () => {
+    if (busy) return;
+    saveSession(null); orderText = "";
+    messages.replaceChildren();
+    const empty = el("div", "empty", "New conversation. Paste a recipe to start.");
+    empty.id = "empty"; messages.appendChild(empty);
+    $("order-body").hidden = true; $("order-empty").hidden = false; setCacheTs("");
+    input.focus();
+  });
+
+  input.focus();
+})();
+</script>
+</body>
+</html>

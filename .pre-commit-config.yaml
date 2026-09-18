@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: anonymization
+        name: supplier anonymization guard
+        entry: uv run python scripts/check_anonymization.py
+        language: system
+        pass_filenames: true
+        exclude: ^(data/|logs/|config/.*\.local\.toml$)

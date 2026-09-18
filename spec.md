@@ -161,7 +161,7 @@ schedule = "daily"
 cache_path = "data/catalog.sqlite"
 ```
 
-`config/supplier.local.toml` (gitignored) has the same keys with the real name, domain, and base URL. Everything else in the repo, including `supplier-api.md`, should reference only placeholder values; the two example URLs in `supplier-api.md` already do, and that file can be folded into the example config once the build starts.
+`config/supplier.local.toml` (gitignored) has the same keys with the real name, domain, and base URL. Everything else in the repo should reference only placeholder values. The former `supplier-api.md` note has been folded into the example config's header comment.
 
 `.gitignore` additions needed: `config/*.local.toml`, `data/`, `logs/`. Raw catalog exports (`*_all_products_*.json`) are already excluded.
 
@@ -238,7 +238,7 @@ cache_path = "data/catalog.sqlite"
 | 282 | Lallemand Tørgær | yeast |
 | 19 | Tilsætning - Krydderier, sukker, sirup m.m. | other |
 
-This map is the `ingredient_type` pre-filter used by `search_catalog`. It lives in the supplier config, not in code, since category ids are shop-specific. It is a first pass from category names and counts, not confirmed with the supplier, see [intent.md](./intent.md) open questions.
+This map is the `ingredient_type` pre-filter used by `search_catalog`. It lives in the supplier config, not in code, since category ids are shop-specific. It is a first pass from category names and counts, not confirmed with the supplier, see [intent.md](./intent.md) open questions. **Superseded during the build:** the shipped map in `config/supplier.example.toml` is an expanded version of this table, see "Resolved during the build" under Open questions.
 
 ## Success metrics
 
@@ -263,10 +263,15 @@ Ordered to match the goals in intent.md.
 Business and supplier-facing open questions live in [intent.md](./intent.md). Engineering questions specific to this spec:
 
 - Does the platform's products-all endpoint tolerate one automated fetch per day without rate limiting or blocking? Assumed yes given the size (a few MB); verify on the first scheduled run and back off if not.
-- Do `Stock` and `StockWithoutReservation` differ in practice for this shop, and which one should "in stock" mean? Default to `StockWithoutReservation > 0 and Buyable and Online and not Soldout` until checked against the export.
 - Is one shared passphrase enough for the private demo, or is a per-person link (token in URL) worth the small extra effort so access can be revoked individually?
 
 Resolved since the previous version: stock is a daily snapshot by design (there is no real-time endpoint, and the staleness risk is accepted in intent.md, with the cache timestamp shown on every list).
+
+Resolved during the build (checked against the July export, see plan.md "Three findings"):
+
+- In-stock rule: `StockWithoutReservation > 0 and Buyable and not Soldout`. `Online` is `False` on all 1771 products in the export, so it is projected into the cache but not used; including it would have marked the whole catalog unavailable.
+- Category map: the first-pass list below missed most of the catalog's base malts, liquid yeast, and several hop subcategories. The shipped map in `config/supplier.example.toml` is expanded (370 of 1771 products), and a product whose primary category is unmapped is still included if a secondary category is mapped, unless its primary category is explicitly excluded (distillation yeast). Still unconfirmed with the supplier; `scripts/check_categories.py` re-checks it against any raw export.
+- `Handle` is already a full path (`/shop/...`), so the product link is `base_url` plus `Handle`; `Link` and `Url` are null in the export. `Prices` always has exactly one element.
 
 ## Timeline considerations
 

@@ -20,3 +20,11 @@ build/
 
 # OS
 .DS_Store
+
+# BrewChat local state (real supplier config, catalog cache, logs, eval replies)
+config/*.local.toml
+data/
+logs/
+evals/results/
+.pytest_cache/
+!.env.example
