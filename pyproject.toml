@@ -1,0 +1,35 @@
+[project]
+name = "brewchat"
+version = "0.1.0"
+description = "Turns a pasted beer recipe into a priced shopping list from a cached supplier catalog."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+dependencies = [
+    "anthropic>=0.70",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "rapidfuzz>=3.9",
+    "httpx>=0.27",
+    "pydantic>=2.7",
+    "itsdangerous>=2.2",
+    "python-multipart>=0.0.9",
+    "python-dotenv>=1.2.3",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.23",
+    "pre-commit>=3.7",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["brewchat"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

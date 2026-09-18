@@ -1,0 +1,26 @@
+# Stub, not the primary sync path.
+#
+# The daily catalog sync runs as a host-side cron on the deployed container,
+# where the real supplier config and the SQLite cache already live (see
+# README.md, "Deploy"). Running it here would need the real config as a
+# secret AND a way to ship the cache to the host, for no gain.
+#
+# Kept so a future move to Actions has a starting point: add a
+# SUPPLIER_LOCAL_TOML secret, then upload data/catalog.sqlite somewhere the
+# app can read it.
+name: catalog-sync (manual stub)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    if: ${{ false }}  # disabled until a cache hand-off exists
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: echo "$SUPPLIER_LOCAL_TOML" > config/supplier.local.toml
+        env:
+          SUPPLIER_LOCAL_TOML: ${{ secrets.SUPPLIER_LOCAL_TOML }}
+      - run: uv run scripts/sync_catalog.py

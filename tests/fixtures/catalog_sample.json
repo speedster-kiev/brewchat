@@ -1,0 +1,1739 @@
+{
+ "amount": 52,
+ "productIds": [
+  101,
+  102,
+  103,
+  104,
+  105,
+  106,
+  107,
+  108,
+  109,
+  110,
+  111,
+  112,
+  113,
+  114,
+  115,
+  116,
+  117,
+  118,
+  119,
+  120,
+  201,
+  202,
+  203,
+  204,
+  205,
+  206,
+  207,
+  208,
+  209,
+  210,
+  211,
+  212,
+  213,
+  214,
+  301,
+  302,
+  303,
+  304,
+  305,
+  306,
+  307,
+  401,
+  402,
+  403,
+  404,
+  501,
+  601,
+  701,
+  702,
+  703,
+  704,
+  705
+ ],
+ "products": [
+  {
+   "Id": 101,
+   "ItemNumber": "HC-0101",
+   "Title": "Pale Ale Malt, ebc 5 - 7 EBC, 1 kg",
+   "CategoryId": 287,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Pale ale malt",
+   "Stock": 120,
+   "StockWithoutReservation": 120,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 22.0,
+     "PriceMinWithVat": 22.0,
+     "PriceMinWithoutVat": 17.6,
+     "FullPriceMinWithVat": 22.0,
+     "FullPriceMinWithoutVat": 17.6
+    }
+   ],
+   "Handle": "/shop/287-pale-ale-malt/101-pale-ale-malt-ebc-5-7-ebc-1-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 102,
+   "ItemNumber": "HC-0102",
+   "Title": "Pilsner Malt, ebc 3 - 5 EBC, 1 kg",
+   "CategoryId": 286,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Pilsner malt",
+   "Stock": 200,
+   "StockWithoutReservation": 200,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 20.0,
+     "PriceMinWithVat": 20.0,
+     "PriceMinWithoutVat": 16.0,
+     "FullPriceMinWithVat": 20.0,
+     "FullPriceMinWithoutVat": 16.0
+    }
+   ],
+   "Handle": "/shop/286-pilsner-malt/102-pilsner-malt-ebc-3-5-ebc-1-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 103,
+   "ItemNumber": "HC-0103",
+   "Title": "Munich Malt, ebc 15 EBC, 1 kg",
+   "CategoryId": 288,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Munich Malt",
+   "Stock": 40,
+   "StockWithoutReservation": 40,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 24.0,
+     "PriceMinWithVat": 24.0,
+     "PriceMinWithoutVat": 19.2,
+     "FullPriceMinWithVat": 24.0,
+     "FullPriceMinWithoutVat": 19.2
+    }
+   ],
+   "Handle": "/shop/288-munich-malt/103-munich-malt-ebc-15-ebc-1-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 104,
+   "ItemNumber": "HC-0104",
+   "Title": "Vienna Malt, ebc 8 EBC, 1 kg",
+   "CategoryId": 289,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Vienna Malt",
+   "Stock": 0,
+   "StockWithoutReservation": 0,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 23.0,
+     "PriceMinWithVat": 23.0,
+     "PriceMinWithoutVat": 18.4,
+     "FullPriceMinWithVat": 23.0,
+     "FullPriceMinWithoutVat": 18.4
+    }
+   ],
+   "Handle": "/shop/289-vienna-malt/104-vienna-malt-ebc-8-ebc-1-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 105,
+   "ItemNumber": "HC-0105",
+   "Title": "Crystal Malt 150 EBC (approx. 60L), 1 kg",
+   "CategoryId": 34,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Karamel malt",
+   "Stock": 35,
+   "StockWithoutReservation": 35,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 28.0,
+     "PriceMinWithVat": 28.0,
+     "PriceMinWithoutVat": 22.4,
+     "FullPriceMinWithVat": 28.0,
+     "FullPriceMinWithoutVat": 22.4
+    }
+   ],
+   "Handle": "/shop/34-karamel-malt/105-crystal-malt-150-ebc-approx-60l-1-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 106,
+   "ItemNumber": "HC-0106",
+   "Title": "Caramel Malt 80 EBC (approx. 40L), 1 kg",
+   "CategoryId": 34,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Karamel malt",
+   "Stock": 18,
+   "StockWithoutReservation": 18,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 28.0,
+     "PriceMinWithVat": 28.0,
+     "PriceMinWithoutVat": 22.4,
+     "FullPriceMinWithVat": 28.0,
+     "FullPriceMinWithoutVat": 22.4
+    }
+   ],
+   "Handle": "/shop/34-karamel-malt/106-caramel-malt-80-ebc-approx-40l-1-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 107,
+   "ItemNumber": "HC-0107",
+   "Title": "Caramel Malt 300 EBC (approx. 120L), 1 kg",
+   "CategoryId": 34,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Karamel malt",
+   "Stock": 9,
+   "StockWithoutReservation": 9,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 29.0,
+     "PriceMinWithVat": 29.0,
+     "PriceMinWithoutVat": 23.2,
+     "FullPriceMinWithVat": 29.0,
+     "FullPriceMinWithoutVat": 23.2
+    }
+   ],
+   "Handle": "/shop/34-karamel-malt/107-caramel-malt-300-ebc-approx-120l-1-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 108,
+   "ItemNumber": "HC-0108",
+   "Title": "Roasted Barley, ebc 1100 - 1300 EBC, 1 kg",
+   "CategoryId": 37,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Special malt",
+   "Stock": 22,
+   "StockWithoutReservation": 22,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 30.0,
+     "PriceMinWithVat": 30.0,
+     "PriceMinWithoutVat": 24.0,
+     "FullPriceMinWithVat": 30.0,
+     "FullPriceMinWithoutVat": 24.0
+    }
+   ],
+   "Handle": "/shop/37-special-malt/108-roasted-barley-ebc-1100-1300-ebc-1-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 109,
+   "ItemNumber": "HC-0109",
+   "Title": "Chocolate Malt, ebc 900 - 1100 EBC, 1 kg",
+   "CategoryId": 37,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Special malt",
+   "Stock": 15,
+   "StockWithoutReservation": 15,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 31.0,
+     "PriceMinWithVat": 31.0,
+     "PriceMinWithoutVat": 24.8,
+     "FullPriceMinWithVat": 31.0,
+     "FullPriceMinWithoutVat": 24.8
+    }
+   ],
+   "Handle": "/shop/37-special-malt/109-chocolate-malt-ebc-900-1100-ebc-1-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 110,
+   "ItemNumber": "HC-0110",
+   "Title": "Pale Chocolate Malt, ebc 500 - 700 EBC, 1 kg",
+   "CategoryId": 37,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Special malt",
+   "Stock": 0,
+   "StockWithoutReservation": 0,
+   "Soldout": true,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 31.0,
+     "PriceMinWithVat": 31.0,
+     "PriceMinWithoutVat": 24.8,
+     "FullPriceMinWithVat": 31.0,
+     "FullPriceMinWithoutVat": 24.8
+    }
+   ],
+   "Handle": "/shop/37-special-malt/110-pale-chocolate-malt-ebc-500-700-ebc-1-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 111,
+   "ItemNumber": "HC-0111",
+   "Title": "Carafa Special Type II, ebc 1100 - 1200 EBC, 1 kg",
+   "CategoryId": 37,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Special malt",
+   "Stock": 6,
+   "StockWithoutReservation": 6,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 34.0,
+     "PriceMinWithVat": 34.0,
+     "PriceMinWithoutVat": 27.2,
+     "FullPriceMinWithVat": 34.0,
+     "FullPriceMinWithoutVat": 27.2
+    }
+   ],
+   "Handle": "/shop/37-special-malt/111-carafa-special-type-ii-ebc-1100-1200-ebc-1-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 112,
+   "ItemNumber": "HC-0112",
+   "Title": "Carapils (dextrin malt), ebc 3 - 5 EBC, 1 kg",
+   "CategoryId": 34,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Karamel malt",
+   "Stock": 30,
+   "StockWithoutReservation": 30,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 27.0,
+     "PriceMinWithVat": 27.0,
+     "PriceMinWithoutVat": 21.6,
+     "FullPriceMinWithVat": 27.0,
+     "FullPriceMinWithoutVat": 21.6
+    }
+   ],
+   "Handle": "/shop/34-karamel-malt/112-carapils-dextrin-malt-ebc-3-5-ebc-1-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 113,
+   "ItemNumber": "HC-0113",
+   "Title": "Biscuit Malt, ebc 50 EBC, 1 kg",
+   "CategoryId": 37,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Special malt",
+   "Stock": 12,
+   "StockWithoutReservation": 12,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 30.0,
+     "PriceMinWithVat": 30.0,
+     "PriceMinWithoutVat": 24.0,
+     "FullPriceMinWithVat": 30.0,
+     "FullPriceMinWithoutVat": 24.0
+    }
+   ],
+   "Handle": "/shop/37-special-malt/113-biscuit-malt-ebc-50-ebc-1-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 114,
+   "ItemNumber": "HC-0114",
+   "Title": "Aroma Malt, ebc 150 EBC, 1 kg",
+   "CategoryId": 37,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Special malt",
+   "Stock": 4,
+   "StockWithoutReservation": 4,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 30.0,
+     "PriceMinWithVat": 30.0,
+     "PriceMinWithoutVat": 24.0,
+     "FullPriceMinWithVat": 30.0,
+     "FullPriceMinWithoutVat": 24.0
+    }
+   ],
+   "Handle": "/shop/37-special-malt/114-aroma-malt-ebc-150-ebc-1-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 115,
+   "ItemNumber": "HC-0115",
+   "Title": "Cara Blond, ebc 18 - 20 EBC, 1 kg",
+   "CategoryId": 34,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Karamel malt",
+   "Stock": 10,
+   "StockWithoutReservation": 10,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 28.0,
+     "PriceMinWithVat": 28.0,
+     "PriceMinWithoutVat": 22.4,
+     "FullPriceMinWithVat": 28.0,
+     "FullPriceMinWithoutVat": 22.4
+    }
+   ],
+   "Handle": "/shop/34-karamel-malt/115-cara-blond-ebc-18-20-ebc-1-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 116,
+   "ItemNumber": "HC-0116",
+   "Title": "Wheat Malt, ebc 4 - 5 EBC, 1 kg",
+   "CategoryId": 36,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Hvede malt",
+   "Stock": 50,
+   "StockWithoutReservation": 50,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 23.0,
+     "PriceMinWithVat": 23.0,
+     "PriceMinWithoutVat": 18.4,
+     "FullPriceMinWithVat": 23.0,
+     "FullPriceMinWithoutVat": 18.4
+    }
+   ],
+   "Handle": "/shop/36-hvede-malt/116-wheat-malt-ebc-4-5-ebc-1-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 117,
+   "ItemNumber": "HC-0117",
+   "Title": "Flaked Oats, 1 kg",
+   "CategoryId": 64,
+   "SecondaryCategoryIds": [],
+   "CategoryTitle": "Div. flager",
+   "Stock": 25,
+   "StockWithoutReservation": 25,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 19.0,
+     "PriceMinWithVat": 19.0,
+     "PriceMinWithoutVat": 15.2,
+     "FullPriceMinWithVat": 19.0,
+     "FullPriceMinWithoutVat": 15.2
+    }
+   ],
+   "Handle": "/shop/64-div-flager/117-flaked-oats-1-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 118,
+   "ItemNumber": "HC-0118",
+   "Title": "Flaked Barley, 1 kg",
+   "CategoryId": 64,
+   "SecondaryCategoryIds": [],
+   "CategoryTitle": "Div. flager",
+   "Stock": 14,
+   "StockWithoutReservation": 14,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 19.0,
+     "PriceMinWithVat": 19.0,
+     "PriceMinWithoutVat": 15.2,
+     "FullPriceMinWithVat": 19.0,
+     "FullPriceMinWithoutVat": 15.2
+    }
+   ],
+   "Handle": "/shop/64-div-flager/118-flaked-barley-1-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 119,
+   "ItemNumber": "HC-0119",
+   "Title": "Light Dry Malt Extract (spraymalt), 1 kg",
+   "CategoryId": 290,
+   "SecondaryCategoryIds": [],
+   "CategoryTitle": "Spraymalt",
+   "Stock": 30,
+   "StockWithoutReservation": 30,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 65.0,
+     "PriceMinWithVat": 65.0,
+     "PriceMinWithoutVat": 52.0,
+     "FullPriceMinWithVat": 65.0,
+     "FullPriceMinWithoutVat": 52.0
+    }
+   ],
+   "Handle": "/shop/290-spraymalt/119-light-dry-malt-extract-spraymalt-1-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 120,
+   "ItemNumber": "HC-0120",
+   "Title": "Pale Ale Malt 25 kg sack, ebc 5 - 7 EBC",
+   "CategoryId": 263,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Hele 25 kg. maltsaekke",
+   "Stock": 3,
+   "StockWithoutReservation": 3,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 450.0,
+     "PriceMinWithVat": 450.0,
+     "PriceMinWithoutVat": 360.0,
+     "FullPriceMinWithVat": 450.0,
+     "FullPriceMinWithoutVat": 360.0
+    }
+   ],
+   "Handle": "/shop/263-hele-25-kg-maltsaekke/120-pale-ale-malt-25-kg-sack-ebc-5-7-ebc/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 121,
+   "ItemNumber": "HC-0121",
+   "Title": "Maris Otter Malt - Northfield Maltings, ebc 5 - 7, pr. 100 g.",
+   "CategoryId": 6,
+   "SecondaryCategoryIds": [],
+   "CategoryTitle": "Malt",
+   "Stock": 40,
+   "StockWithoutReservation": 40,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 2.5,
+     "PriceMinWithVat": 2.5,
+     "PriceMinWithoutVat": 2.0,
+     "FullPriceMinWithVat": 2.5,
+     "FullPriceMinWithoutVat": 2.0
+    }
+   ],
+   "Handle": "/shop/6-malt/121-maris-otter-malt-northfield-maltings-ebc-5-7-pr-100-g/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 122,
+   "ItemNumber": "HC-0122",
+   "Title": "Maris Otter Malt - Northfield Maltings, ebc 5 - 7, pr. 25 kg.",
+   "CategoryId": 263,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Hele 25 kg. maltsaekke",
+   "Stock": 40,
+   "StockWithoutReservation": 40,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 425.0,
+     "PriceMinWithVat": 425.0,
+     "PriceMinWithoutVat": 340.0,
+     "FullPriceMinWithVat": 425.0,
+     "FullPriceMinWithoutVat": 340.0
+    }
+   ],
+   "Handle": "/shop/263-hele-25-kg-maltsaekke/122-maris-otter-malt-northfield-maltings-ebc-5-7-pr-25-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 201,
+   "ItemNumber": "HC-0201",
+   "Title": "Centennial hop pellets, 100 g, alpha 9,5%",
+   "CategoryId": 51,
+   "SecondaryCategoryIds": [
+    "7"
+   ],
+   "CategoryTitle": "Amerikanske humle pellets",
+   "Stock": 20,
+   "StockWithoutReservation": 20,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 45.0,
+     "PriceMinWithVat": 45.0,
+     "PriceMinWithoutVat": 36.0,
+     "FullPriceMinWithVat": 45.0,
+     "FullPriceMinWithoutVat": 36.0
+    }
+   ],
+   "Handle": "/shop/51-amerikanske-humle-pellets/201-centennial-hop-pellets-100-g-alpha-9-5/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 202,
+   "ItemNumber": "HC-0202",
+   "Title": "Amarillo hop pellets, 100 g, alpha 8,9%",
+   "CategoryId": 51,
+   "SecondaryCategoryIds": [
+    "7"
+   ],
+   "CategoryTitle": "Amerikanske humle pellets",
+   "Stock": 0,
+   "StockWithoutReservation": 0,
+   "Soldout": true,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 55.0,
+     "PriceMinWithVat": 55.0,
+     "PriceMinWithoutVat": 44.0,
+     "FullPriceMinWithVat": 55.0,
+     "FullPriceMinWithoutVat": 44.0
+    }
+   ],
+   "Handle": "/shop/51-amerikanske-humle-pellets/202-amarillo-hop-pellets-100-g-alpha-8-9/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 203,
+   "ItemNumber": "HC-0203",
+   "Title": "Cascade hop pellets, 100 g, alpha 6,5%",
+   "CategoryId": 51,
+   "SecondaryCategoryIds": [
+    "7"
+   ],
+   "CategoryTitle": "Amerikanske humle pellets",
+   "Stock": 40,
+   "StockWithoutReservation": 40,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 39.0,
+     "PriceMinWithVat": 39.0,
+     "PriceMinWithoutVat": 31.2,
+     "FullPriceMinWithVat": 39.0,
+     "FullPriceMinWithoutVat": 31.2
+    }
+   ],
+   "Handle": "/shop/51-amerikanske-humle-pellets/203-cascade-hop-pellets-100-g-alpha-6-5/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 204,
+   "ItemNumber": "HC-0204",
+   "Title": "Columbus hop pellets, 100 g, alpha 15,5%",
+   "CategoryId": 51,
+   "SecondaryCategoryIds": [
+    "7"
+   ],
+   "CategoryTitle": "Amerikanske humle pellets",
+   "Stock": 12,
+   "StockWithoutReservation": 12,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 42.0,
+     "PriceMinWithVat": 42.0,
+     "PriceMinWithoutVat": 33.6,
+     "FullPriceMinWithVat": 42.0,
+     "FullPriceMinWithoutVat": 33.6
+    }
+   ],
+   "Handle": "/shop/51-amerikanske-humle-pellets/204-columbus-hop-pellets-100-g-alpha-15-5/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 205,
+   "ItemNumber": "HC-0205",
+   "Title": "Citra hop pellets, 100 g, alpha 12,5%",
+   "CategoryId": 51,
+   "SecondaryCategoryIds": [
+    "7"
+   ],
+   "CategoryTitle": "Amerikanske humle pellets",
+   "Stock": 30,
+   "StockWithoutReservation": 30,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 65.0,
+     "PriceMinWithVat": 65.0,
+     "PriceMinWithoutVat": 52.0,
+     "FullPriceMinWithVat": 65.0,
+     "FullPriceMinWithoutVat": 52.0
+    }
+   ],
+   "Handle": "/shop/51-amerikanske-humle-pellets/205-citra-hop-pellets-100-g-alpha-12-5/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 221,
+   "ItemNumber": "HC-0221",
+   "Title": "Citra hop pellets US, alpha 12,5% 300 g.",
+   "CategoryId": 51,
+   "SecondaryCategoryIds": [
+    "7"
+   ],
+   "CategoryTitle": "Amerikanske humle pellets",
+   "Stock": 40,
+   "StockWithoutReservation": 40,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 170.0,
+     "PriceMinWithVat": 170.0,
+     "PriceMinWithoutVat": 136.0,
+     "FullPriceMinWithVat": 170.0,
+     "FullPriceMinWithoutVat": 136.0
+    }
+   ],
+   "Handle": "/shop/51-amerikanske-humle-pellets/221-citra-hop-pellets-us-alpha-12-5-300-g/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 206,
+   "ItemNumber": "HC-0206",
+   "Title": "Galaxy hop pellets, 100 g, alpha 15,0%",
+   "CategoryId": 54,
+   "SecondaryCategoryIds": [
+    "7"
+   ],
+   "CategoryTitle": "Australsk humle",
+   "Stock": 0,
+   "StockWithoutReservation": 0,
+   "Soldout": true,
+   "Buyable": false,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 69.0,
+     "PriceMinWithVat": 69.0,
+     "PriceMinWithoutVat": 55.2,
+     "FullPriceMinWithVat": 69.0,
+     "FullPriceMinWithoutVat": 55.2
+    }
+   ],
+   "Handle": "/shop/54-australsk-humle/206-galaxy-hop-pellets-100-g-alpha-15-0/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 207,
+   "ItemNumber": "HC-0207",
+   "Title": "Mosaic hop pellets, 100 g, alpha 12,0%",
+   "CategoryId": 51,
+   "SecondaryCategoryIds": [
+    "7"
+   ],
+   "CategoryTitle": "Amerikanske humle pellets",
+   "Stock": 8,
+   "StockWithoutReservation": 8,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 62.0,
+     "PriceMinWithVat": 62.0,
+     "PriceMinWithoutVat": 49.6,
+     "FullPriceMinWithVat": 62.0,
+     "FullPriceMinWithoutVat": 49.6
+    }
+   ],
+   "Handle": "/shop/51-amerikanske-humle-pellets/207-mosaic-hop-pellets-100-g-alpha-12-0/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 208,
+   "ItemNumber": "HC-0208",
+   "Title": "Magnum hop pellets, 100 g, alpha 13,0%",
+   "CategoryId": 53,
+   "SecondaryCategoryIds": [
+    "7"
+   ],
+   "CategoryTitle": "Europaeiske humler",
+   "Stock": 25,
+   "StockWithoutReservation": 25,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 38.0,
+     "PriceMinWithVat": 38.0,
+     "PriceMinWithoutVat": 30.4,
+     "FullPriceMinWithVat": 38.0,
+     "FullPriceMinWithoutVat": 30.4
+    }
+   ],
+   "Handle": "/shop/53-europaeiske-humler/208-magnum-hop-pellets-100-g-alpha-13-0/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 209,
+   "ItemNumber": "HC-0209",
+   "Title": "Fuggles hop pellets, 100 g, alpha 4,5%",
+   "CategoryId": 52,
+   "SecondaryCategoryIds": [
+    "7"
+   ],
+   "CategoryTitle": "Britiske humler",
+   "Stock": 10,
+   "StockWithoutReservation": 10,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 39.0,
+     "PriceMinWithVat": 39.0,
+     "PriceMinWithoutVat": 31.2,
+     "FullPriceMinWithVat": 39.0,
+     "FullPriceMinWithoutVat": 31.2
+    }
+   ],
+   "Handle": "/shop/52-britiske-humler/209-fuggles-hop-pellets-100-g-alpha-4-5/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 210,
+   "ItemNumber": "HC-0210",
+   "Title": "Marynka hop pellets, 100 g, alpha 9,0%",
+   "CategoryId": 53,
+   "SecondaryCategoryIds": [
+    "7"
+   ],
+   "CategoryTitle": "Europaeiske humler",
+   "Stock": 7,
+   "StockWithoutReservation": 7,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 40.0,
+     "PriceMinWithVat": 40.0,
+     "PriceMinWithoutVat": 32.0,
+     "FullPriceMinWithVat": 40.0,
+     "FullPriceMinWithoutVat": 32.0
+    }
+   ],
+   "Handle": "/shop/53-europaeiske-humler/210-marynka-hop-pellets-100-g-alpha-9-0/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 211,
+   "ItemNumber": "HC-0211",
+   "Title": "Lublin (Lubelski) hop pellets, 100 g, alpha 4,0%",
+   "CategoryId": 53,
+   "SecondaryCategoryIds": [
+    "7"
+   ],
+   "CategoryTitle": "Europaeiske humler",
+   "Stock": 5,
+   "StockWithoutReservation": 5,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 40.0,
+     "PriceMinWithVat": 40.0,
+     "PriceMinWithoutVat": 32.0,
+     "FullPriceMinWithVat": 40.0,
+     "FullPriceMinWithoutVat": 32.0
+    }
+   ],
+   "Handle": "/shop/53-europaeiske-humler/211-lublin-lubelski-hop-pellets-100-g-alpha-4-0/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 212,
+   "ItemNumber": "HC-0212",
+   "Title": "Nelson Sauvin hop pellets, 100 g, alpha 12,0%",
+   "CategoryId": 55,
+   "SecondaryCategoryIds": [
+    "7"
+   ],
+   "CategoryTitle": "New Zealand",
+   "Stock": 6,
+   "StockWithoutReservation": 6,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 70.0,
+     "PriceMinWithVat": 70.0,
+     "PriceMinWithoutVat": 56.0,
+     "FullPriceMinWithVat": 70.0,
+     "FullPriceMinWithoutVat": 56.0
+    }
+   ],
+   "Handle": "/shop/55-new-zealand/212-nelson-sauvin-hop-pellets-100-g-alpha-12-0/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 213,
+   "ItemNumber": "HC-0213",
+   "Title": "Apollo hop pellets, 100 g, alpha 18,0%",
+   "CategoryId": 51,
+   "SecondaryCategoryIds": [
+    "7"
+   ],
+   "CategoryTitle": "Amerikanske humle pellets",
+   "Stock": 0,
+   "StockWithoutReservation": 0,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 48.0,
+     "PriceMinWithVat": 48.0,
+     "PriceMinWithoutVat": 38.4,
+     "FullPriceMinWithVat": 48.0,
+     "FullPriceMinWithoutVat": 38.4
+    }
+   ],
+   "Handle": "/shop/51-amerikanske-humle-pellets/213-apollo-hop-pellets-100-g-alpha-18-0/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 214,
+   "ItemNumber": "HC-0214",
+   "Title": "Simcoe hop pellets, 100 g, alpha 13,0%",
+   "CategoryId": 51,
+   "SecondaryCategoryIds": [
+    "7"
+   ],
+   "CategoryTitle": "Amerikanske humle pellets",
+   "Stock": 15,
+   "StockWithoutReservation": 15,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 60.0,
+     "PriceMinWithVat": 60.0,
+     "PriceMinWithoutVat": 48.0,
+     "FullPriceMinWithVat": 60.0,
+     "FullPriceMinWithoutVat": 48.0
+    }
+   ],
+   "Handle": "/shop/51-amerikanske-humle-pellets/214-simcoe-hop-pellets-100-g-alpha-13-0/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 301,
+   "ItemNumber": "HC-0301",
+   "Title": "Fermentis - SafAle US-05, 11,5 g. dry yeast",
+   "CategoryId": 8,
+   "SecondaryCategoryIds": [
+    "78"
+   ],
+   "CategoryTitle": "Gaer",
+   "Stock": 272,
+   "StockWithoutReservation": 272,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 39.75,
+     "PriceMinWithVat": 39.75,
+     "PriceMinWithoutVat": 31.8,
+     "FullPriceMinWithVat": 39.75,
+     "FullPriceMinWithoutVat": 31.8
+    }
+   ],
+   "Handle": "/shop/8-gaer/301-fermentis-safale-us-05-11-5-g-dry-yeast/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 302,
+   "ItemNumber": "HC-0302",
+   "Title": "Fermentis - SafAle T-58, 11,5 g. dry yeast",
+   "CategoryId": 8,
+   "SecondaryCategoryIds": [
+    "78"
+   ],
+   "CategoryTitle": "Gaer",
+   "Stock": 30,
+   "StockWithoutReservation": 30,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 39.75,
+     "PriceMinWithVat": 39.75,
+     "PriceMinWithoutVat": 31.8,
+     "FullPriceMinWithVat": 39.75,
+     "FullPriceMinWithoutVat": 31.8
+    }
+   ],
+   "Handle": "/shop/8-gaer/302-fermentis-safale-t-58-11-5-g-dry-yeast/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 303,
+   "ItemNumber": "HC-0303",
+   "Title": "Fermentis - SafAle S-04, 11,5 g. dry yeast",
+   "CategoryId": 8,
+   "SecondaryCategoryIds": [
+    "78"
+   ],
+   "CategoryTitle": "Gaer",
+   "Stock": 50,
+   "StockWithoutReservation": 50,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 39.75,
+     "PriceMinWithVat": 39.75,
+     "PriceMinWithoutVat": 31.8,
+     "FullPriceMinWithVat": 39.75,
+     "FullPriceMinWithoutVat": 31.8
+    }
+   ],
+   "Handle": "/shop/8-gaer/303-fermentis-safale-s-04-11-5-g-dry-yeast/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 304,
+   "ItemNumber": "HC-0304",
+   "Title": "Lallemand - LalBrew Verdant IPA, 11 g. dry yeast",
+   "CategoryId": 282,
+   "SecondaryCategoryIds": [
+    "8"
+   ],
+   "CategoryTitle": "Lallemand Toergaer",
+   "Stock": 20,
+   "StockWithoutReservation": 20,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 49.0,
+     "PriceMinWithVat": 49.0,
+     "PriceMinWithoutVat": 39.2,
+     "FullPriceMinWithVat": 49.0,
+     "FullPriceMinWithoutVat": 39.2
+    }
+   ],
+   "Handle": "/shop/282-lallemand-toergaer/304-lallemand-lalbrew-verdant-ipa-11-g-dry-yeast/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 305,
+   "ItemNumber": "HC-0305",
+   "Title": "Lallemand - LalBrew Nottingham, 11 g. dry yeast",
+   "CategoryId": 282,
+   "SecondaryCategoryIds": [
+    "8"
+   ],
+   "CategoryTitle": "Lallemand Toergaer",
+   "Stock": 25,
+   "StockWithoutReservation": 25,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 42.0,
+     "PriceMinWithVat": 42.0,
+     "PriceMinWithoutVat": 33.6,
+     "FullPriceMinWithVat": 42.0,
+     "FullPriceMinWithoutVat": 33.6
+    }
+   ],
+   "Handle": "/shop/282-lallemand-toergaer/305-lallemand-lalbrew-nottingham-11-g-dry-yeast/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 306,
+   "ItemNumber": "HC-0306",
+   "Title": "White Labs WLP001 California Ale, liquid yeast",
+   "CategoryId": 68,
+   "SecondaryCategoryIds": [
+    "8"
+   ],
+   "CategoryTitle": "White Labs Vaadgaer",
+   "Stock": 4,
+   "StockWithoutReservation": 4,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 89.0,
+     "PriceMinWithVat": 89.0,
+     "PriceMinWithoutVat": 71.2,
+     "FullPriceMinWithVat": 89.0,
+     "FullPriceMinWithoutVat": 71.2
+    }
+   ],
+   "Handle": "/shop/68-white-labs-vaadgaer/306-white-labs-wlp001-california-ale-liquid-yeast/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 307,
+   "ItemNumber": "HC-0307",
+   "Title": "Fermentis - SafLager W-34/70, 11,5 g. dry yeast",
+   "CategoryId": 8,
+   "SecondaryCategoryIds": [
+    "78"
+   ],
+   "CategoryTitle": "Gaer",
+   "Stock": 0,
+   "StockWithoutReservation": 0,
+   "Soldout": true,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 45.0,
+     "PriceMinWithVat": 45.0,
+     "PriceMinWithoutVat": 36.0,
+     "FullPriceMinWithVat": 45.0,
+     "FullPriceMinWithoutVat": 36.0
+    }
+   ],
+   "Handle": "/shop/8-gaer/307-fermentis-saflager-w-34-70-11-5-g-dry-yeast/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 401,
+   "ItemNumber": "HC-0401",
+   "Title": "Candi sugar, white (hvid kandis), 500 g",
+   "CategoryId": 19,
+   "SecondaryCategoryIds": [],
+   "CategoryTitle": "Tilsaetning",
+   "Stock": 15,
+   "StockWithoutReservation": 15,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 35.0,
+     "PriceMinWithVat": 35.0,
+     "PriceMinWithoutVat": 28.0,
+     "FullPriceMinWithVat": 35.0,
+     "FullPriceMinWithoutVat": 28.0
+    }
+   ],
+   "Handle": "/shop/19-tilsaetning/401-candi-sugar-white-hvid-kandis-500-g/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 402,
+   "ItemNumber": "HC-0402",
+   "Title": "Irish moss, 50 g",
+   "CategoryId": 19,
+   "SecondaryCategoryIds": [],
+   "CategoryTitle": "Tilsaetning",
+   "Stock": 20,
+   "StockWithoutReservation": 20,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 25.0,
+     "PriceMinWithVat": 25.0,
+     "PriceMinWithoutVat": 20.0,
+     "FullPriceMinWithVat": 25.0,
+     "FullPriceMinWithoutVat": 20.0
+    }
+   ],
+   "Handle": "/shop/19-tilsaetning/402-irish-moss-50-g/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 403,
+   "ItemNumber": "HC-0403",
+   "Title": "Gypsum (calcium sulphate), 100 g",
+   "CategoryId": 272,
+   "SecondaryCategoryIds": [],
+   "CategoryTitle": "Mineraler",
+   "Stock": 10,
+   "StockWithoutReservation": 10,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 20.0,
+     "PriceMinWithVat": 20.0,
+     "PriceMinWithoutVat": 16.0,
+     "FullPriceMinWithVat": 20.0,
+     "FullPriceMinWithoutVat": 16.0
+    }
+   ],
+   "Handle": "/shop/272-mineraler/403-gypsum-calcium-sulphate-100-g/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 404,
+   "ItemNumber": "HC-0404",
+   "Title": "Coriander seed, crushed, 50 g",
+   "CategoryId": 74,
+   "SecondaryCategoryIds": [],
+   "CategoryTitle": "Krydderier",
+   "Stock": 6,
+   "StockWithoutReservation": 6,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 22.0,
+     "PriceMinWithVat": 22.0,
+     "PriceMinWithoutVat": 17.6,
+     "FullPriceMinWithVat": 22.0,
+     "FullPriceMinWithoutVat": 17.6
+    }
+   ],
+   "Handle": "/shop/74-krydderier/404-coriander-seed-crushed-50-g/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 501,
+   "ItemNumber": "HC-0501",
+   "Title": "Smoked Malt, ebc 5 EBC, 1 kg (new arrival)",
+   "CategoryId": 121,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Nyheder",
+   "Stock": 8,
+   "StockWithoutReservation": 8,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 26.0,
+     "PriceMinWithVat": 26.0,
+     "PriceMinWithoutVat": 20.8,
+     "FullPriceMinWithVat": 26.0,
+     "FullPriceMinWithoutVat": 20.8
+    }
+   ],
+   "Handle": "/shop/121-nyheder/501-smoked-malt-ebc-5-ebc-1-kg-new-arrival/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 601,
+   "ItemNumber": "HC-0601",
+   "Title": "Turbo distillers yeast, 205 g",
+   "CategoryId": 137,
+   "SecondaryCategoryIds": [
+    "8"
+   ],
+   "CategoryTitle": "Toergaer destillering",
+   "Stock": 40,
+   "StockWithoutReservation": 40,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 59.0,
+     "PriceMinWithVat": 59.0,
+     "PriceMinWithoutVat": 47.2,
+     "FullPriceMinWithVat": 59.0,
+     "FullPriceMinWithoutVat": 47.2
+    }
+   ],
+   "Handle": "/shop/137-toergaer-destillering/601-turbo-distillers-yeast-205-g/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 701,
+   "ItemNumber": "HC-0701",
+   "Title": "Fermentation bucket 30 L with lid",
+   "CategoryId": 300,
+   "SecondaryCategoryIds": [],
+   "CategoryTitle": "Gaerspande",
+   "Stock": 12,
+   "StockWithoutReservation": 12,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 149.0,
+     "PriceMinWithVat": 149.0,
+     "PriceMinWithoutVat": 119.2,
+     "FullPriceMinWithVat": 149.0,
+     "FullPriceMinWithoutVat": 119.2
+    }
+   ],
+   "Handle": "/shop/300-gaerspande/701-fermentation-bucket-30-l-with-lid/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 702,
+   "ItemNumber": "HC-0702",
+   "Title": "Cornelius keg 19 L, used",
+   "CategoryId": 267,
+   "SecondaryCategoryIds": [],
+   "CategoryTitle": "Cornelius Fustager",
+   "Stock": 3,
+   "StockWithoutReservation": 3,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 499.0,
+     "PriceMinWithVat": 499.0,
+     "PriceMinWithoutVat": 399.2,
+     "FullPriceMinWithVat": 499.0,
+     "FullPriceMinWithoutVat": 399.2
+    }
+   ],
+   "Handle": "/shop/267-cornelius-fustager/702-cornelius-keg-19-l-used/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 703,
+   "ItemNumber": "HC-0703",
+   "Title": "Cleaning powder, 1 kg",
+   "CategoryId": 105,
+   "SecondaryCategoryIds": [],
+   "CategoryTitle": "Rengoering",
+   "Stock": 40,
+   "StockWithoutReservation": 40,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 79.0,
+     "PriceMinWithVat": 79.0,
+     "PriceMinWithoutVat": 63.2,
+     "FullPriceMinWithVat": 79.0,
+     "FullPriceMinWithoutVat": 63.2
+    }
+   ],
+   "Handle": "/shop/105-rengoering/703-cleaning-powder-1-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 704,
+   "ItemNumber": "HC-0704",
+   "Title": "All-grain kit: Belgian Blond Ale 20 L",
+   "CategoryId": 91,
+   "SecondaryCategoryIds": [],
+   "CategoryTitle": "All-Grain Beer Kit",
+   "Stock": 5,
+   "StockWithoutReservation": 5,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 289.0,
+     "PriceMinWithVat": 289.0,
+     "PriceMinWithoutVat": 231.2,
+     "FullPriceMinWithVat": 289.0,
+     "FullPriceMinWithoutVat": 231.2
+    }
+   ],
+   "Handle": "/shop/91-all-grain-beer-kit/704-all-grain-kit-belgian-blond-ale-20-l/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 705,
+   "ItemNumber": "HC-0705",
+   "Title": "Hydrometer with jar",
+   "CategoryId": 262,
+   "SecondaryCategoryIds": [],
+   "CategoryTitle": "Hydrometre",
+   "Stock": 9,
+   "StockWithoutReservation": 9,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 89.0,
+     "PriceMinWithVat": 89.0,
+     "PriceMinWithoutVat": 71.2,
+     "FullPriceMinWithVat": 89.0,
+     "FullPriceMinWithoutVat": 71.2
+    }
+   ],
+   "Handle": "/shop/262-hydrometre/705-hydrometer-with-jar/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  }
+ ],
+ "filterMap": {}
+}
