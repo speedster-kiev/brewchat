@@ -65,7 +65,7 @@ def test_adversarial_parser_finds_all_fixtures():
         {f"A{i}" for i in range(1, 6)}
         | {f"B{i}" for i in range(1, 5)}
         | {f"C{i}" for i in range(1, 5)}
-        | {f"D{i}" for i in range(1, 5)}
+        | {f"D{i}" for i in range(1, 7)}
     )
     assert set(by_id) == expected_ids
     for fid, fx in by_id.items():
@@ -287,6 +287,25 @@ def test_d_redirect_fails():
     assert evals.evaluate_fixture(fx, [_turn(answer)] * len(fx.user_messages)).passed
 
 
+def test_d5_origin_pick_needs_the_belgian_pilsner_as_a_match():
+    fx = _fx("D5")
+    assert "Belgian Pilsner malt" in fx.user_messages[0]
+    castle = "shop/286-pilsner-malt/124-pilsner-malt-castle-malting-ebc-3-5-pr-100-g"
+    danish = "shop/286-pilsner-malt/125-pilsner-malt-fuglsang-ebc-4-pr-100-g"
+
+    def turn(source, handle, name="Belgian Pilsner malt"):
+        return _turn("Here is your list.", [PARSE_CALL], {"items": [{
+            "ingredient_name": name, "source": source, "in_stock": True,
+            "product_title": "Pilsner Malt", "product_handle": f"/{handle}/",
+        }]})
+
+    assert evals.evaluate_fixture(fx, [turn("matched", castle)]).passed
+    assert not evals.evaluate_fixture(fx, [turn("matched", danish)]).passed
+    assert not evals.evaluate_fixture(fx, [turn("substituted", castle)]).passed
+    assert not evals.evaluate_fixture(fx, [turn("matched", castle, name="Cara Blond")]).passed
+    assert not evals.evaluate_fixture(fx, [_turn("Here is your list.")]).passed  # no list built
+
+
 def test_judge_verdict_parsing():
     assert evals.parse_judge_verdict('{"verdict": "pass", "reason": "ok"}') == (
         True,
@@ -346,3 +365,22 @@ def test_cost_estimate_uses_cache_multipliers():
         "output_tokens": 3,
         "api_calls": 1,
     }
+
+
+def test_d6_suggestion_must_be_a_match_and_the_reply_must_show_alternatives():
+    fx = _fx("D6")
+    assert "Munich Helles" in fx.user_messages[0]
+    bestmalz = "shop/286-pilsner-malt/123-pilsner-malt-bestmalz-ebc-2-4-pr-100-g"
+    danish = "shop/286-pilsner-malt/125-pilsner-malt-fuglsang-ebc-4-pr-100-g"
+
+    def turn(source, handle, reply):
+        return _turn(reply, [PARSE_CALL], {"items": [{
+            "ingredient_name": "Pilsner malt", "source": source, "in_stock": True,
+            "product_title": "Pilsner Malt", "product_handle": f"/{handle}/",
+        }]})
+
+    shows = "Here is your list. Also in stock: Castle Malting (BE), 1.75 DKK. Say if you'd rather have it."
+    assert evals.evaluate_fixture(fx, [turn("matched", bestmalz, shows)]).passed
+    assert not evals.evaluate_fixture(fx, [turn("matched", bestmalz, "Here is your list.")]).passed
+    assert not evals.evaluate_fixture(fx, [turn("matched", danish, shows)]).passed
+    assert not evals.evaluate_fixture(fx, [turn("user_override", bestmalz, shows)]).passed

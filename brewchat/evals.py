@@ -737,6 +737,47 @@ def check_out_of_stock_honesty(
     )
 
 
+def check_origin_pick(turn: dict[str, Any], ingredient: str, handle_fragment: str) -> Check:
+    """D5: the recipe's ingredient must be the product from the origin it named.
+
+    Pass: the list line for ``ingredient`` is ``matched`` and its handle contains
+    ``handle_fragment`` (any pack size of the right maltster). Fail: no list, a
+    different product, or the right one presented as something other than a match.
+    """
+    items = _order_items(turn)
+    if items is None:
+        return Check("origin_pick", False, "no list built")
+    name = ingredient.lower()
+    lines = [it for it in items if name in (it["name"] or "").lower()]
+    if not lines:
+        return Check("origin_pick", False, f"{ingredient} missing from the order list")
+    for it in lines:
+        handle = (it["handle"] or "").strip("/")
+        if handle_fragment not in handle:
+            return Check("origin_pick", False, f"picked {it['title'] or handle}")
+        if it["source"] != "matched":
+            return Check("origin_pick", False, f"right product listed as {it['source']}")
+    return Check("origin_pick", True, ", ".join(it["title"] or it["handle"] for it in lines))
+
+
+def check_suggestion_offered(
+    turn: dict[str, Any], ingredient: str, handle_fragment: str, alternatives: tuple[str, ...]
+) -> Check:
+    """D6: the suggested product is listed as a match and the reply names an alternative.
+
+    Pass: the list line for ``ingredient`` is ``matched`` with a handle containing
+    ``handle_fragment``, and the reply mentions at least one of ``alternatives``
+    (producer names) so the user can see there was a choice.
+    """
+    picked = check_origin_pick(turn, ingredient, handle_fragment)
+    if not picked.ok:
+        return Check("suggestion_offered", False, picked.note)
+    reply = (turn.get("reply") or "").lower()
+    if not any(a.lower() in reply for a in alternatives):
+        return Check("suggestion_offered", False, "reply names no alternative")
+    return Check("suggestion_offered", True, picked.note)
+
+
 def evaluate_fixture(
     fixture: Fixture,
     turns: list[dict[str, Any]],
@@ -813,6 +854,12 @@ def evaluate_fixture(
         )
 
     elif fixture.category == "D":
+        if fixture.id == "D5":
+            checks.append(check_origin_pick(turns[-1] if turns else {}, "pilsner", "castle-malting"))
+        elif fixture.id == "D6":
+            checks.append(check_suggestion_offered(
+                turns[-1] if turns else {}, "pilsner", "bestmalz", ("castle malting", "fuglsang")
+            ))
         last_reply = replies[-1] if replies else ""
         redirected = is_redirect(last_reply)
         checks.append(

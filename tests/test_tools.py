@@ -50,6 +50,28 @@ def test_submit_parsed_recipe_stores_parse(tools, session):
     assert [i.name for i in session.parsed_recipe] == ["Pilsner malt", "Saaz"]
 
 
+def test_submit_parsed_recipe_stores_style(tools, session):
+    ingredients = [{"type": "fermentable", "name": "Pilsner malt", "amount": 4.5, "unit": "kg"}]
+    tools["submit_parsed_recipe"].call({"ingredients": ingredients, "style": " Munich Helles "})
+    assert session.style == "Munich Helles"
+    tools["submit_parsed_recipe"].call({"ingredients": ingredients})  # a corrected recipe without one
+    assert session.style is None
+
+
+def test_search_catalog_uses_the_recipe_style_unless_told_otherwise(tools, session):
+    ingredients = [{"type": "fermentable", "name": "Pilsner malt", "amount": 4.5, "unit": "kg"}]
+
+    def top(**extra):
+        out = json.loads(tools["search_catalog"].call(
+            {"query": "Pilsner malt", "ingredient_type": "fermentable", **extra}))
+        return out["candidates"][0]
+
+    assert "no origin or style" in top()["why"]
+    tools["submit_parsed_recipe"].call({"ingredients": ingredients, "style": "Munich Helles"})
+    assert top()["origin"] == "DE" and "Munich Helles" in top()["why"]
+    assert top(style="Belgian Tripel")["origin"] == "BE"
+
+
 def test_submit_parsed_recipe_rejects_bad_type(tools, session):
     with pytest.raises(ToolError) as exc:
         tools["submit_parsed_recipe"].call({"ingredients": [

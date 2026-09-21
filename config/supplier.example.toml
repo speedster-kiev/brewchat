@@ -73,3 +73,60 @@ cache_path = "data/catalog.sqlite"
 [exclude_categories]
 # Primary categories never included via a secondary-category match.
 ids = [137]             # Distillation yeast: tagged "yeast" but not for beer
+
+# Producer -> ISO country code, matched case-insensitively against the product
+# title ("Pilsner malt - Castle Malting, ebc 3 - 5, ..."). Lets search_catalog
+# tell a Belgian pilsner malt from a Danish one, and rank a recipe's "Belgian
+# Pilsner malt" accordingly. The list is specific to this shop's catalog.
+# "UK" is accepted and stored as GB. Products with no mapped producer fall back
+# to a country token in the title (hops: "... pellets US, alpha ...") and
+# otherwise have no origin. List producers still missing a mapping with
+#   uv run scripts/check_origins.py
+[origins]
+"Weyermann" = "DE"
+"Bestmalz" = "DE"
+"Castle Malting" = "BE"
+"Maselis" = "BE"
+"Fuglsang" = "DK"
+"Gyrup Gårdmalt" = "DK"
+"Valsemøllen" = "DK"
+"Crisp Malting" = "GB"
+"Crisp" = "GB"
+"Thomas Fawcett" = "GB"
+"Muntons" = "GB"
+"Kegland" = "AU"
+
+# Beer style -> the origin(s) its base malt and hops usually come from. Only
+# ranks search candidates (among equally good matches, this origin first); it
+# never hides one, and the user still gets the alternatives. A style is matched
+# as a whole word anywhere in the recipe's style, longest key first. An origin
+# word in the style itself ("American Pale Ale", "Czech Pale Lager") wins over
+# this table, so such styles need no entry. Values are a country code or a list.
+[style_origins]
+"helles" = "DE"
+"pils" = ["DE", "CZ"]
+"pilsner" = ["DE", "CZ"]
+"maerzen" = "DE"
+"märzen" = "DE"
+"oktoberfest" = "DE"
+"dunkel" = "DE"
+"schwarzbier" = "DE"
+"bock" = "DE"
+"kölsch" = "DE"
+"kolsch" = "DE"
+"altbier" = "DE"
+"weizen" = "DE"
+"hefeweizen" = "DE"
+"weissbier" = "DE"
+"rauchbier" = "DE"
+"saison" = "BE"
+"tripel" = "BE"
+"dubbel" = "BE"
+"witbier" = "BE"
+"best bitter" = "GB"
+"esb" = "GB"
+"mild" = "GB"
+"porter" = "GB"
+"stout" = "GB"
+"west coast ipa" = "US"
+"neipa" = "US"

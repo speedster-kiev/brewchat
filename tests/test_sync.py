@@ -29,7 +29,7 @@ def test_projection_keeps_exactly_schema_fields(settings, sample_raw):
 def test_filter_keeps_only_mapped_categories(settings, sample_raw):
     products = filter_and_project(sample_raw, settings)
     ids = {p.id for p in products}
-    assert len(products) == 49
+    assert len(products) == 52
     assert 501 in ids  # included via secondary category
     assert 601 not in ids  # excluded primary category
     assert not ids & {701, 702, 703, 704, 705}  # equipment and kits
@@ -63,8 +63,8 @@ def test_in_stock_truth_table(kw, expected):
 
 def test_sync_writes_cache_and_timestamp(settings, sample_raw):
     n = sync(settings, client=_json_client(sample_raw), now=SAMPLE_FETCHED_AT)
-    assert n == 49
-    assert len(load_ingredients(settings.cache_path)) == 49
+    assert n == 52
+    assert len(load_ingredients(settings.cache_path)) == 52
     assert cache_timestamp(settings.cache_path) == SAMPLE_FETCHED_AT
 
 

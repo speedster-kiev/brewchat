@@ -48,7 +48,12 @@ class ToolContext:
     def from_settings(cls, settings: Settings) -> "ToolContext":
         return cls(
             settings=settings,
-            index=CatalogIndex(settings.cache_path, settings.supplier.prices_include_vat),
+            index=CatalogIndex(
+                settings.cache_path,
+                settings.supplier.prices_include_vat,
+                settings.origins,
+                settings.style_origins,
+            ),
             substitution_log=SubstitutionLog(settings.logs_dir / "substitutions.jsonl"),
             session_log=SessionLog(settings.logs_dir / "sessions.sqlite"),
         )
@@ -257,7 +262,7 @@ def make_tools(ctx: ToolContext) -> list:
     """The three agent tools, bound to ``ctx``; the session comes from ``current_session``."""
 
     @beta_tool
-    def submit_parsed_recipe(ingredients: list[Ingredient]) -> str:
+    def submit_parsed_recipe(ingredients: list[Ingredient], style: str | None = None) -> str:
         """Record the recipe, parsed into standardized ingredients, before any catalog lookup.
 
         Call this once per recipe (again if the user corrects the recipe), with one entry per
@@ -269,11 +274,15 @@ def make_tools(ctx: ToolContext) -> list:
 
         Args:
             ingredients: Every purchasable ingredient in the recipe, in recipe order.
+            style: The beer style if the recipe names or clearly implies one (e.g. "Munich Helles",
+                "American Pale Ale"), else omit. Later searches use it to put ingredients from the
+                style's usual country first; it never hides a candidate.
         """
         if not ingredients:
             raise ToolError("ingredients is empty: include every purchasable ingredient from the recipe.")
         session = _session()
         session.parsed_recipe = list(ingredients)
+        session.style = (style or "").strip() or None
         counts: dict[str, int] = {}
         for ing in ingredients:
             counts[ing.type] = counts.get(ing.type, 0) + 1
@@ -281,13 +290,24 @@ def make_tools(ctx: ToolContext) -> list:
         return f"Recorded {len(ingredients)} ingredients ({breakdown}). Now search the catalog for each."
 
     @beta_tool
-    def search_catalog(query: str, ingredient_type: IngredientType | None = None, limit: int = 5) -> str:
+    def search_catalog(
+        query: str, ingredient_type: IngredientType | None = None, limit: int = 5, style: str | None = None
+    ) -> str:
         """Fuzzy-search the shop's ingredient catalog by product title; returns candidates, you pick.
 
         Titles embed the spec text (EBC colour, alpha acid %, yeast strain), so read them the way a
         brewer would. Each candidate has handle, title, score (0-100, higher is closer), in_stock,
-        stock, price, pack_size and ingredient_type. price is for one unit of pack_size (e.g. "100 g"
-        or "25 kg"); pack_size null means the price is per pack. Out-of-stock products ARE returned, flagged
+        stock, price, pack_size, ingredient_type, origin, suggested and why. price is for one unit of pack_size (e.g. "100 g"
+        or "25 kg"); pack_size null means the price is per pack. origin is the ISO country code of the
+        maltster or hop ("BE", "DE", "DK", "GB", "US", ...), or null when the shop's title doesn't say: null
+        means unknown, not "none". Put a country in the query when the recipe asks for one ("Belgian Pilsner
+        malt", "UK Fuggles"): it is taken out of the text match and used only to put candidates from that
+        country first among equally good ones, so still check the origin field. The recipe's style (from
+        submit_parsed_recipe) does the same for that style's usual country, e.g. German malt for a helles.
+        suggested=true marks the code's pick among the best matches (in stock, and from the asked-for or
+        style's origin where that decides); why says what put it first, and is null when there was no
+        tie to break. The other equally good candidates are real alternatives: nothing is filtered
+        out, so the user can choose one. Out-of-stock products ARE returned, flagged
         in_stock=false, so you can see the right product exists but cannot be ordered: never put an
         out-of-stock product on the list without saying so. To substitute, search again for the
         substitute (by name, style or spec) and use only a handle this tool returned. An explicit
@@ -298,8 +318,11 @@ def make_tools(ctx: ToolContext) -> list:
             query: Ingredient name, optionally with spec words, e.g. "US-05", "Pilsner malt", "Citra".
             ingredient_type: Restrict to fermentable, hop, yeast or other. Use the recipe ingredient's type.
             limit: Maximum candidates to return (1-20).
+            style: Override the recipe's style for this search; normally omit it.
         """
-        results = ctx.index.search(query, ingredient_type=ingredient_type, limit=limit)
+        if style is None:
+            style = getattr(current_session.get(None), "style", None)
+        results = ctx.index.search(query, ingredient_type=ingredient_type, limit=limit, style=style)
         if not results:
             scope = f" among {ingredient_type} products" if ingredient_type else ""
             return (

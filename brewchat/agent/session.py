@@ -20,6 +20,7 @@ class Session:
     session_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     messages: list[dict[str, Any]] = field(default_factory=list)
     parsed_recipe: list[Ingredient] | None = None
+    style: str | None = None  # beer style from the parsed recipe; ranks search candidates by origin
     order_list: OrderList | None = None
     # original_name -> proposed product handle/title from the most recent build,
     # so a later build can tell "rejected" from a fresh "unavailable".
