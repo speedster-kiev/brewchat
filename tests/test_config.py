@@ -43,6 +43,51 @@ def test_unknown_ingredient_type_rejected(tmp_path: Path):
         load_settings(bad)
 
 
+def test_origins_map_producers_to_iso_codes():
+    s = load_settings(EXAMPLE_CONFIG)
+    assert s.origins["Castle Malting"] == "BE"
+    assert all(len(code) == 2 and code.isupper() for code in s.origins.values())
+
+
+def test_origins_are_optional_and_uk_is_stored_as_gb(tmp_path: Path):
+    without = EXAMPLE_CONFIG.read_text().split("[origins]")[0]
+    cfg = tmp_path / "no_origins.toml"
+    cfg.write_text(without)
+    assert load_settings(cfg).origins == {}
+    cfg.write_text(without + '[origins]\n"Muntons" = "uk"\n')
+    assert load_settings(cfg).origins == {"Muntons": "GB"}
+
+
+@pytest.mark.parametrize("bad", ['"Muntons" = "England"', '"Muntons" = 44'])
+def test_origin_that_is_not_a_country_code_is_rejected(tmp_path: Path, bad):
+    cfg = tmp_path / "bad.toml"
+    cfg.write_text(EXAMPLE_CONFIG.read_text().split("[origins]")[0] + "[origins]\n" + bad + "\n")
+    with pytest.raises(ConfigError, match="origins"):
+        load_settings(cfg)
+
+
+def test_example_config_maps_styles_to_origins():
+    styles = load_settings(EXAMPLE_CONFIG).style_origins
+    assert styles["helles"] == ("DE",) and set(styles["pilsner"]) == {"DE", "CZ"}
+
+
+def test_style_origins_are_optional_and_normalised(tmp_path: Path):
+    base = EXAMPLE_CONFIG.read_text().split("[style_origins]")[0]
+    cfg = tmp_path / "styles.toml"
+    cfg.write_text(base)
+    assert load_settings(cfg).style_origins == {}
+    cfg.write_text(base + '[style_origins]\n"Best Bitter" = "uk"\n"Pils" = ["de", "cz", "DE"]\n')
+    assert load_settings(cfg).style_origins == {"best bitter": ("GB",), "pils": ("DE", "CZ")}
+
+
+@pytest.mark.parametrize("bad", ['"helles" = "Germany"', '"helles" = []', '"helles" = 49'])
+def test_style_origin_that_is_not_a_country_code_is_rejected(tmp_path: Path, bad):
+    cfg = tmp_path / "bad_styles.toml"
+    cfg.write_text(EXAMPLE_CONFIG.read_text().split("[style_origins]")[0] + "[style_origins]\n" + bad + "\n")
+    with pytest.raises(ConfigError, match="style_origins"):
+        load_settings(cfg)
+
+
 def test_vat_note_follows_flag():
     s = load_settings(EXAMPLE_CONFIG)
     assert "include VAT" in s.supplier.vat_note

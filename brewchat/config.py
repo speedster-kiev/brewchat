@@ -13,6 +13,8 @@ import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from brewchat.catalog.origin import normalize_code
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 EXAMPLE_CONFIG = REPO_ROOT / "config" / "supplier.example.toml"
 LOCAL_CONFIG = REPO_ROOT / "config" / "supplier.local.toml"
@@ -54,6 +56,8 @@ class Settings:
     logs_dir: Path
     categories: dict[int, str]
     exclude_categories: frozenset[int] = field(default_factory=frozenset)
+    origins: dict[str, str] = field(default_factory=dict)  # producer name -> ISO country code
+    style_origins: dict[str, tuple[str, ...]] = field(default_factory=dict)  # beer style -> usual origins
     passphrase: str | None = None
     model: str = DEFAULT_MODEL  # Claude model id, from $BREWCHAT_MODEL
 
@@ -122,12 +126,31 @@ def load_settings(path: str | Path | None = None, *, base_dir: Path | None = Non
         categories = {int(k): v for k, v in raw.get("categories", {}).items()}
         exclude = frozenset(int(i) for i in raw.get("exclude_categories", {}).get("ids", []))
         cache_path = _resolve(raw["sync"]["cache_path"], base)
+        origins = {str(k).strip(): str(v) for k, v in raw.get("origins", {}).items()}
+        raw_styles = {
+            str(k).strip().lower(): list(v) if isinstance(v, list) else [v]
+            for k, v in raw.get("style_origins", {}).items()
+        }
     except (KeyError, ValueError, tomllib.TOMLDecodeError) as exc:
         raise ConfigError(f"Supplier config {config_path.name} is malformed: {exc!r}") from exc
 
     bad = {v for v in categories.values() if v not in INGREDIENT_TYPES}
     if bad:
         raise ConfigError(f"Unknown ingredient types in [categories]: {sorted(bad)}")
+
+    bad_origins = {k: v for k, v in origins.items() if not k or normalize_code(v) is None}
+    if bad_origins:
+        raise ConfigError(f"[origins] maps a producer name to a two-letter country code, got: {bad_origins}")
+    origins = {k: code for k, v in origins.items() if (code := normalize_code(v))}
+
+    bad_styles = {
+        k: v for k, v in raw_styles.items() if not k or not v or any(normalize_code(str(c)) is None for c in v)
+    }
+    if bad_styles:
+        raise ConfigError(
+            f"[style_origins] maps a beer style to a country code or a list of them, got: {bad_styles}"
+        )
+    style_origins = {k: tuple(dict.fromkeys(normalize_code(str(c)) for c in v)) for k, v in raw_styles.items()}
 
     logs_dir = _resolve(os.environ.get("BREWCHAT_LOGS_DIR", "logs"), base)
     return Settings(
@@ -136,6 +159,8 @@ def load_settings(path: str | Path | None = None, *, base_dir: Path | None = Non
         logs_dir=logs_dir,
         categories=categories,
         exclude_categories=exclude,
+        origins=origins,
+        style_origins=style_origins,
         passphrase=os.environ.get("BREWCHAT_PASSPHRASE") or None,
         model=os.environ.get("BREWCHAT_MODEL") or DEFAULT_MODEL,
     )

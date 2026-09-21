@@ -730,6 +730,99 @@
    "PacketId": null
   },
   {
+   "Id": 123,
+   "ItemNumber": "HC-0123",
+   "Title": "Pilsner Malt - Bestmalz, ebc 2 - 4, pr. 100 g.",
+   "CategoryId": 286,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Pilsner malt",
+   "Stock": 40,
+   "StockWithoutReservation": 40,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 2.5,
+     "PriceMinWithVat": 2.5,
+     "PriceMinWithoutVat": 2.0,
+     "FullPriceMinWithVat": 2.5,
+     "FullPriceMinWithoutVat": 2.0
+    }
+   ],
+   "Handle": "/shop/286-pilsner-malt/123-pilsner-malt-bestmalz-ebc-2-4-pr-100-g/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 124,
+   "ItemNumber": "HC-0124",
+   "Title": "Pilsner Malt - Castle Malting, ebc 3 - 5, pr. 100 g.",
+   "CategoryId": 286,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Pilsner malt",
+   "Stock": 30,
+   "StockWithoutReservation": 30,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 2.5,
+     "PriceMinWithVat": 2.5,
+     "PriceMinWithoutVat": 2.0,
+     "FullPriceMinWithVat": 2.5,
+     "FullPriceMinWithoutVat": 2.0
+    }
+   ],
+   "Handle": "/shop/286-pilsner-malt/124-pilsner-malt-castle-malting-ebc-3-5-pr-100-g/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 125,
+   "ItemNumber": "HC-0125",
+   "Title": "Pilsner Malt - Fuglsang, ebc 4, pr. 100 g.",
+   "CategoryId": 286,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Pilsner malt",
+   "Stock": 25,
+   "StockWithoutReservation": 25,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 2.5,
+     "PriceMinWithVat": 2.5,
+     "PriceMinWithoutVat": 2.0,
+     "FullPriceMinWithVat": 2.5,
+     "FullPriceMinWithoutVat": 2.0
+    }
+   ],
+   "Handle": "/shop/286-pilsner-malt/125-pilsner-malt-fuglsang-ebc-4-pr-100-g/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
    "Id": 201,
    "ItemNumber": "HC-0201",
    "Title": "Centennial hop pellets, 100 g, alpha 9,5%",

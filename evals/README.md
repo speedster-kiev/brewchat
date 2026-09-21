@@ -5,7 +5,7 @@ There are two live-model evals and one timing protocol. The evals call the Anthr
 | What | Input | Pass bar |
 |---|---|---|
 | `parse` | `recipes-fixtures/recipes.md` (10 recipes) vs `recipes-fixtures/recipes.expected.json` | overall field accuracy >= 90% |
-| `adversarial` | `recipes-fixtures/adversarial-prompts.md` (A1-A5, B1-B4, C1-C4, D1-D4) | 100% of fixtures |
+| `adversarial` | `recipes-fixtures/adversarial-prompts.md` (A1-A5, B1-B4, C1-C4, D1-D6) | 100% of fixtures |
 | time-to-order | a real recipe, by hand | see the protocol below |
 
 Both modes run against the **synthetic** catalog in `tests/fixtures/catalog_sample.json`. The script syncs it into a temp SQLite file using the committed `config/supplier.example.toml` (HopCellar, `hopcellar.example`), and the session and substitution logs go to the same temp dir. So an eval run never needs the real supplier config and never writes to the real `logs/`.
@@ -16,7 +16,7 @@ Both modes run against the **synthetic** catalog in `tests/fixtures/catalog_samp
 # needs ANTHROPIC_API_KEY in .env (or exported); exits with code 2 and a message if unset
 uv run python scripts/run_evals.py parse                    # all 10 recipes
 uv run python scripts/run_evals.py parse --recipe 7         # one recipe (or --only recipe_7)
-uv run python scripts/run_evals.py adversarial              # all 17 fixtures
+uv run python scripts/run_evals.py adversarial              # all 19 fixtures
 uv run python scripts/run_evals.py adversarial --only C4    # one fixture, or --only A1,B2
 uv run python scripts/run_evals.py adversarial --judge      # plus an LLM verdict per fixture
 uv run python scripts/run_evals.py parse --model claude-opus-5   # model override (default: $BREWCHAT_MODEL, else claude-haiku-4-5)
@@ -123,8 +123,8 @@ The pass bar is 100%. One off-topic tool call, one leaked config string or one f
 
 Every run calls the configured model (default `claude-haiku-4-5`, no thinking; models that support it get adaptive thinking).
 - `parse` makes 10 turns, one per recipe. Each turn ends as soon as `submit_parsed_recipe` has run (`Runner.run_turn(..., stop_after=...)`), so there are no stubbed searches or closing reply to pay for; usually one API call per recipe.
-- `adversarial` makes 21 turns over 17 fixtures. The C fixtures run the full real tool loop, with a search per ingredient and a list build, so they are the expensive ones.
-- `--judge` adds 17 short calls.
+- `adversarial` makes 23 turns over 19 fixtures. The C fixtures run the full real tool loop, with a search per ingredient and a list build, so they are the expensive ones.
+- `--judge` adds 19 short calls.
 
 Each run prints its token usage (uncached input, cache writes, cache reads, output including thinking) and an estimated cost from the price table in `scripts/run_evals.py`. Every result record carries the per-turn `usage` too.
 

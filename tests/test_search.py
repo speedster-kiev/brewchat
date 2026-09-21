@@ -6,12 +6,17 @@ from brewchat.catalog.search import CatalogIndex, normalize
 from brewchat.catalog.sync import filter_and_project, write_cache
 from tests.conftest import SAMPLE_FETCHED_AT
 
-CANDIDATE_KEYS = {"handle", "title", "score", "in_stock", "stock", "price", "pack_size", "ingredient_type"}
+CANDIDATE_KEYS = {
+    "handle", "title", "score", "in_stock", "stock", "price", "pack_size", "ingredient_type", "origin",
+    "suggested", "why",
+}
 
 
 @pytest.fixture
 def index(settings, catalog_cache) -> CatalogIndex:
-    return CatalogIndex(catalog_cache, include_vat=True)
+    return CatalogIndex(
+        catalog_cache, include_vat=True, origins=settings.origins, style_table=settings.style_origins
+    )
 
 
 def test_normalize_strips_packaging_noise():
@@ -94,3 +99,134 @@ def test_reloads_when_fetched_at_changes(settings, sample_raw, catalog_cache, in
     write_cache(filter_and_project(sample_raw, settings), catalog_cache, later)
     assert citra_100g()["in_stock"] is False
     assert index.cache_timestamp == later
+
+
+# -- origin (issue #1) ----------------------------------------------------------
+
+
+# The synthetic catalog has four pilsner malts (BE, DE, DK, none), so ask for four.
+N_PILSNERS = 4
+
+
+def _all_pilsner(results):
+    return bool(results) and all("pilsner malt" in r["title"].lower() for r in results)
+
+
+def test_belgian_query_returns_pilsner_malts_with_the_belgian_one_first(index):
+    results = index.search("Belgian Pilsner malt", ingredient_type="fermentable", limit=N_PILSNERS)
+    assert _all_pilsner(results)
+    assert results[0]["title"].startswith("Pilsner Malt - Castle Malting")
+    assert results[0]["origin"] == "BE" and results[0]["in_stock"] is True
+    # Without the origin word the alphabetical tie-break decides, and it is not the Belgian one.
+    assert index.search("Pilsner malt", ingredient_type="fermentable")[0]["origin"] != "BE"
+
+
+@pytest.mark.parametrize(("query", "origin"), [("Danish pilsner malt", "DK"), ("German pilsner malt", "DE")])
+def test_origin_word_prefers_that_maltster(index, query, origin):
+    results = index.search(query, ingredient_type="fermentable", limit=N_PILSNERS)
+    assert _all_pilsner(results)
+    assert results[0]["origin"] == origin
+
+
+def test_origin_only_breaks_ties_it_never_outranks_a_better_match(index):
+    # A Belgian query for a malt the Belgian maltster doesn't make must not surface Castle Malting first.
+    results = index.search("Belgian Munich malt", ingredient_type="fermentable")
+    assert results[0]["title"].startswith("Munich Malt")
+    scores = [r["score"] for r in results]
+    assert scores == sorted(scores, reverse=True)
+
+
+def test_asked_for_origin_comes_before_stock_but_stays_flagged(settings, sample_raw, catalog_cache, index):
+    for p in sample_raw["products"]:
+        if p["Id"] == 124:
+            p["StockWithoutReservation"] = 0
+    write_cache(filter_and_project(sample_raw, settings), catalog_cache, datetime(2026, 9, 18, tzinfo=UTC))
+    top = index.search("Belgian pilsner malt", ingredient_type="fermentable")[0]
+    assert top["origin"] == "BE" and top["in_stock"] is False
+
+
+def test_hop_origin_comes_from_the_title_token(index):
+    citra = {r["handle"].split("/")[3].split("-")[0]: r for r in index.search("Citra", "hop", limit=20)}
+    assert citra["221"]["origin"] == "US"  # "Citra hop pellets US, ..."
+    assert citra["205"]["origin"] is None  # "Citra hop pellets, 100 g, ..." names no country
+
+
+def test_unknown_producers_have_no_origin_and_rank_as_before(settings, catalog_cache):
+    bare = CatalogIndex(catalog_cache, include_vat=True)  # no producer map at all
+    results = bare.search("Pilsner malt", ingredient_type="fermentable", limit=20)
+    assert {r["origin"] for r in results} == {None}
+    assert [r["handle"] for r in results] == [
+        r["handle"] for r in CatalogIndex(catalog_cache, include_vat=True, origins={}).search(
+            "Pilsner malt", ingredient_type="fermentable", limit=20)
+    ]
+    # An origin word with nothing to prefer still finds the pilsner malts.
+    assert _all_pilsner(bare.search("Belgian Pilsner malt", "fermentable", limit=N_PILSNERS))
+
+
+def test_words_that_look_like_origins_do_not_disturb_other_searches(index):
+    assert "US-05" in index.search("US-05", ingredient_type="yeast")[0]["title"]
+    assert index.search("Irish moss")[0]["title"].startswith("Irish moss")
+
+
+# -- beer style (rank and suggest, never exclude) ------------------------------
+
+
+def test_style_ranks_its_usual_origin_first_and_drops_nothing(index):
+    plain = index.search("Pilsner malt", ingredient_type="fermentable", limit=20)
+    helles = index.search("Pilsner malt", ingredient_type="fermentable", limit=20, style="Munich Helles")
+    assert {r["handle"] for r in helles} == {r["handle"] for r in plain}
+    in_stock = [r for r in helles if r["in_stock"]]
+    de_first = [r["origin"] == "DE" for r in in_stock]
+    assert de_first[0] and de_first == sorted(de_first, reverse=True)  # every DE one before any other
+    assert {r["origin"] for r in helles} >= {"DE", "BE", "DK"}  # the alternatives are still there
+
+
+def test_style_never_outranks_a_better_match(index):
+    results = index.search("Munich malt", ingredient_type="fermentable", style="Munich Helles")
+    assert results[0]["title"].startswith("Munich Malt")
+    scores = [r["score"] for r in results]
+    assert scores == sorted(scores, reverse=True)
+
+
+def test_origin_named_in_the_query_beats_the_style(index):
+    top = index.search("Belgian Pilsner malt", "fermentable", limit=N_PILSNERS, style="Munich Helles")[0]
+    assert top["origin"] == "BE"
+
+
+def test_unknown_style_changes_nothing(index):
+    plain = index.search("Pilsner malt", ingredient_type="fermentable", limit=20)
+    for style in (None, "", "Grätzer", "Cornelius Ale"):
+        assert index.search("Pilsner malt", ingredient_type="fermentable", limit=20, style=style) == plain
+
+
+def test_one_candidate_is_suggested_with_the_reason_it_won(index):
+    results = index.search("Pilsner malt", ingredient_type="fermentable", limit=N_PILSNERS, style="Munich Helles")
+    suggested = [r for r in results if r["suggested"]]
+    assert suggested == [results[0]]
+    assert results[0]["origin"] == "DE" and "DE" in results[0]["why"] and "Munich Helles" in results[0]["why"]
+    assert all(r["why"] is None for r in results[1:])
+    # No origin or style to go on: still suggests one, and says nothing decided it.
+    plain = index.search("Pilsner malt", ingredient_type="fermentable", limit=N_PILSNERS)
+    assert plain[0]["suggested"] and "no origin or style" in plain[0]["why"]
+
+
+def test_suggestion_skips_an_out_of_stock_top_match(settings, sample_raw, catalog_cache, index):
+    for p in sample_raw["products"]:
+        if p["Id"] == 124:
+            p["StockWithoutReservation"] = 0
+    write_cache(filter_and_project(sample_raw, settings), catalog_cache, datetime(2026, 9, 18, tzinfo=UTC))
+    results = index.search("Belgian pilsner malt", ingredient_type="fermentable", limit=N_PILSNERS)
+    assert results[0]["origin"] == "BE" and results[0]["in_stock"] is False
+    assert not results[0]["suggested"]
+    picked = [r for r in results if r["suggested"]]
+    assert len(picked) == 1 and picked[0]["in_stock"] is True
+
+
+def test_no_suggestion_when_nothing_at_the_top_score_is_in_stock(settings, sample_raw, catalog_cache, index):
+    for p in sample_raw["products"]:
+        if p["Id"] == 124:
+            p["StockWithoutReservation"] = 0
+    write_cache(filter_and_project(sample_raw, settings), catalog_cache, datetime(2026, 9, 18, tzinfo=UTC))
+    only = index.search("Pilsner Malt - Castle Malting", ingredient_type="fermentable", limit=1)
+    assert only[0]["origin"] == "BE" and only[0]["in_stock"] is False
+    assert only[0]["suggested"] is False

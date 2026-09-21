@@ -32,7 +32,10 @@ From intent.md, goals in order: (1) portfolio showcase of an end-to-end product 
   - Acceptance: given a recipe in a common format (grain/hop/yeast lines with amounts), the agent emits a complete structured ingredient list with at least 90% field accuracy on the recipe fixture set (`recipes-fixtures/recipes.md`, currently 5 recipes, to be grown to 10 before the demo).
 - Ingredient matching against a cached copy of the supplier's catalog via a `search_catalog` tool.
   - Acceptance: given a parsed ingredient, the tool returns the best-matching candidates (with stock, price, link) or explicitly returns "no match."
-  - Decision: `search_catalog` does a category pre-filter (by ingredient type, using the category map in Data schemas) followed by fuzzy string matching on `Title` with `rapidfuzz`, and returns the top 5 candidates with scores. The agent, not the tool, picks the final match, since it can read the spec text in titles (EBC, alpha acid, attenuation) the way a brewer would. No Postgres trigram or vector search for P0; the catalog is about 1800 products and the filtered ingredient slice is a few hundred, so an in-memory search is enough.
+  - Decision: `search_catalog` does a category pre-filter (by ingredient type, using the category map in Data schemas) followed by fuzzy string matching on `Title` with `rapidfuzz`, and returns the top 5 candidates with scores. The agent, not the tool, picks the final match, since it can read the spec text in titles (EBC, alpha acid, attenuation) the way a brewer would.
+  - Decision (issue #1): country of origin is part of matching. Each candidate carries `origin`, an ISO 3166-1 alpha-2 code or `null` (unknown, which is not the same as "none"). It comes from a producer -> country map in the supplier config (`[origins]`, since maltsters are specific to the shop's catalog), then from a bare country token in the title (hops: "... pellets US, ..."). Origin words in the query ("Belgian", "German", "UK") are taken out of the fuzzy match, because they dilute the score of every title containing "malt", and used only as a tie-break: among candidates with the same score, those with an origin the query asked for come first (before in-stock, then title). Origin never lifts a worse match over a better one. Nothing here uses the model.
+  - Decision (issue #1, beer style): several products can fit one recipe line (a helles calling for "Pilsner malt" fits every pilsner in stock), so that is a choice for the user, not something to filter. `submit_parsed_recipe` takes an optional recipe-level `style`, kept on the session and used by `search_catalog` unless a call overrides it. A `[style_origins]` config table (style -> usual origin codes; an origin word in the style itself, like "Czech Pale Lager", wins) adds one more tie-break tier after the asked-for origin and before stock. Each candidate carries `suggested` (true on the best in-stock candidate among the top-scoring ones, never on an out-of-stock or lower-scoring one) and `why` (what put it first, null when there was no tie). The agent builds the list with the suggested product as a normal match, and after the list names the equally good alternatives with origin and price so the user can switch; a switch is logged as a `user_override`. It never stalls the list on a question.
+  - Acceptance (issue #1): `search("Belgian Pilsner malt", "fermentable")` returns pilsner malts, with a Belgian one first when it exists. Unmapped producers give `origin: null` and rank as before. `scripts/check_origins.py` lists the producers in the cache that have no mapping. When the recipe names an origin and only another origin is available, the agent presents it as a substitution and names the difference in the reason. No Postgres trigram or vector search for P0; the catalog is about 1800 products and the filtered ingredient slice is a few hundred, so an in-memory search is enough.
 - Substitution suggestions for unmatched or out-of-stock ingredients, reasoned directly by the agent using its own trained brewing knowledge, no external rule table. The agent reads the spec details embedded in the catalog's free-text `Title` field (e.g. "ebc 3 - 5 EBC") the same way a brewer would, proposes a substitute, then calls `search_catalog` again to confirm the substitute is actually in stock.
   - Acceptance: given an unmatched ingredient, the agent either returns a substitute (confirmed available via a follow-up catalog lookup) with a one-line reason and a confidence level, or explicitly states none was found.
   - Acceptance: every substitution is presented as a suggestion, never silently swapped in. Each carries a `confidence` of `high`, `medium`, or `low`, and for `medium` and `low` the assistant says in plain words that it isn't sure and why (e.g. "this is a bittering hop, the recipe used it late, so the aroma will differ").
@@ -160,6 +163,16 @@ user_agent = "BrewChat catalog sync (personal project)"
 [sync]
 schedule = "daily"
 cache_path = "data/catalog.sqlite"
+
+# Beer style -> usual origin(s) of its base malt and hops (issue #1); optional. Ranks only.
+[style_origins]
+"helles" = "DE"
+"pils" = ["DE", "CZ"]
+
+# Producer -> ISO country code (issue #1); optional. Matched case-insensitively in the title.
+[origins]
+"Castle Malting" = "BE"
+"Weyermann" = "DE"
 ```
 
 `config/supplier.local.toml` (gitignored) has the same keys with the real name, domain, and base URL. Everything else in the repo should reference only placeholder values. The former `supplier-api.md` note has been folded into the example config's header comment.
@@ -180,6 +193,8 @@ cache_path = "data/catalog.sqlite"
   "spec": "string | null"
 }
 ```
+
+`submit_parsed_recipe` also takes the recipe's beer `style` (string or null), which sits beside the ingredient list rather than inside each ingredient.
 
 `spec` carries whatever the recipe states in its own words (e.g. "8% AA", "120 EBC", "75% attenuation"). It's matched against the catalog's free-text `Title` field, not a structured field on the supplier's side.
 
@@ -223,7 +238,7 @@ cache_path = "data/catalog.sqlite"
 
 **Session timing record**: `session_id`, `started_at` (first message), `last_list_built_at`, `lists_built` (count). Used for the time-to-order measurement; the manual part of the timing is recorded by hand against the same `session_id`.
 
-**Supplier catalog product** (real shape, confirmed from both the products-all and product-by-id endpoints, same product structure in both): the relevant fields are `Id`, `ItemNumber`, `Title` (name plus embedded spec text, e.g. "ebc 3 - 5 EBC"), `CategoryId`, `SecondaryCategoryIds`, `CategoryTitle`, `Stock` / `StockWithoutReservation`, `Soldout`, `Buyable`, `Online`, `Prices` (array with `PriceMinWithVat` / `PriceMinWithoutVat`), and `Handle` (URL slug, product link is `base_url` plus `Handle`). Many titles also carry the unit the price applies to: "pr. 100 g." or "pr. 25 kg." on malts (price per 100 g or per sack), "100 g" or "300 g" on hops, "1000 g" on sugars, "11,5 g." on yeast sachets. This is parsed from the title at read time (`catalog/pack.py`), not stored as a separate column, and is returned to the agent as each search candidate's `pack_size` (null means priced per pack). `scripts/check_pack_sizes.py` lists the sizes found in the cache and the titles that have none. The cache projects down to these fields plus a `fetched_at` timestamp rather than storing the full raw response; most of the remaining fields (dates, VAT group IDs, packet IDs, etc.) aren't needed for matching or display.
+**Supplier catalog product** (real shape, confirmed from both the products-all and product-by-id endpoints, same product structure in both): the relevant fields are `Id`, `ItemNumber`, `Title` (name plus embedded spec text, e.g. "ebc 3 - 5 EBC"), `CategoryId`, `SecondaryCategoryIds`, `CategoryTitle`, `Stock` / `StockWithoutReservation`, `Soldout`, `Buyable`, `Online`, `Prices` (array with `PriceMinWithVat` / `PriceMinWithoutVat`), and `Handle` (URL slug, product link is `base_url` plus `Handle`). Many titles also carry the unit the price applies to: "pr. 100 g." or "pr. 25 kg." on malts (price per 100 g or per sack), "100 g" or "300 g" on hops, "1000 g" on sugars, "11,5 g." on yeast sachets. This is parsed from the title at read time (`catalog/pack.py`), not stored as a separate column, and is returned to the agent as each search candidate's `pack_size` (null means priced per pack). Origin is derived the same way (`catalog/origin.py`, from the `[origins]` config and title tokens) and returned as each candidate's `origin` (null means unknown). `scripts/check_pack_sizes.py` lists the sizes found in the cache and the titles that have none. The cache projects down to these fields plus a `fetched_at` timestamp rather than storing the full raw response; most of the remaining fields (dates, VAT group IDs, packet IDs, etc.) aren't needed for matching or display.
 
 **Brewing-ingredient category filter**, from a real export of the supplier's full catalog (1771 products across roughly 40 categories). Working list of `CategoryId` values that are actual brewing ingredients; everything else in the catalog is equipment, kegs, bottles, cleaning supplies, or hardware-specific accessories and should be excluded from the cache the agent searches:
 

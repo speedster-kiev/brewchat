@@ -23,7 +23,7 @@ One Claude agent in a tool-use loop (Anthropic API tool runner), with exactly th
 | Tool | What it does |
 |---|---|
 | `submit_parsed_recipe` | Structured checkpoint: the agent's parse of the recipe into the standard ingredient schema, before any catalog lookup. |
-| `search_catalog` | Category pre-filter plus `rapidfuzz` over product titles in the cached catalog; top 5 candidates with score, stock, and price. Also used to verify every substitute. |
+| `search_catalog` | Category pre-filter plus `rapidfuzz` over product titles in the cached catalog; top 5 candidates with score, stock, price, pack size and country of origin (an origin word in the query, like "Belgian", or the recipe's beer style, like "Helles", breaks ties toward the usual country; one candidate is marked `suggested`, none is hidden). Also used to verify every substitute. |
 | `build_order_list` | Resolves product links, computes the total, stamps the catalog timestamp, renders the copyable list, and writes the substitution and session logs. |
 
 Substitutions are reasoned from the model's own brewing knowledge (no rule table), verified against the catalog, and always shown as suggestions with a reason and a high/medium/low confidence. Anything that must hold even if the model misbehaves (link construction, logging, timing) lives in code, not in the prompt.
@@ -35,7 +35,7 @@ brewchat/
   agent/             models, tools, system prompt rendering, tool-runner loop
   logs/              substitution log (JSONL), session timing (SQLite), CSV export
   web/               FastAPI app, passphrase gate, single-page chat UI
-scripts/             sync_catalog, check_categories, check_pack_sizes, export_logs, run_evals
+scripts/             sync_catalog, check_categories, check_pack_sizes, check_origins, export_logs, run_evals
 tests/               unit tests, no network and no API key needed
 evals/               live-model evals and the measurement protocol
 ```
@@ -64,7 +64,7 @@ uv run scripts/sync_catalog.py                     # fetch the catalog once (one
 uv run uvicorn brewchat.web.app:app --reload       # then open http://localhost:8000
 ```
 
-The sync keeps the previous cache and exits non-zero if the fetch fails or the response changes shape. To re-check the ingredient category map against a raw export: `uv run scripts/check_categories.py path/to/export.json`. To see which pack size ("pr. 100 g.", "25 kg", "100 g") was read from each cached title, and which titles have none: `uv run scripts/check_pack_sizes.py`.
+The sync keeps the previous cache and exits non-zero if the fetch fails or the response changes shape. To re-check the ingredient category map against a raw export: `uv run scripts/check_categories.py path/to/export.json`. To see which pack size ("pr. 100 g.", "25 kg", "100 g") was read from each cached title, and which titles have none: `uv run scripts/check_pack_sizes.py`. To see how many products got a country of origin and which producers in the titles still have no `[origins]` entry in the local config: `uv run scripts/check_origins.py`.
 
 ## Test and evaluate
 
