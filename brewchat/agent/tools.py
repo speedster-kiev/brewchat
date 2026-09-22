@@ -297,7 +297,7 @@ def make_tools(ctx: ToolContext) -> list:
 
         Titles embed the spec text (EBC colour, alpha acid %, yeast strain), so read them the way a
         brewer would. Each candidate has handle, title, score (0-100, higher is closer), in_stock,
-        stock, price, pack_size, ingredient_type, origin, suggested and why. price is for one unit of pack_size (e.g. "100 g"
+        price, pack_size, ingredient_type, origin, suggested and why. price is for one unit of pack_size (e.g. "100 g"
         or "25 kg"); pack_size null means the price is per pack. origin is the ISO country code of the
         maltster or hop ("BE", "DE", "DK", "GB", "US", ...), or null when the shop's title doesn't say: null
         means unknown, not "none". Put a country in the query when the recipe asks for one ("Belgian Pilsner
