@@ -7,7 +7,7 @@ from brewchat.catalog.sync import filter_and_project, write_cache
 from tests.conftest import SAMPLE_FETCHED_AT
 
 CANDIDATE_KEYS = {
-    "handle", "title", "score", "in_stock", "stock", "price", "pack_size", "ingredient_type", "origin",
+    "handle", "title", "score", "in_stock", "price", "pack_size", "ingredient_type", "origin",
     "suggested", "why",
 }
 
