@@ -39,11 +39,15 @@ _PACKAGING = re.compile(
     re.IGNORECASE,
 )
 _SPACES = re.compile(r"\s+")
+# Recipes say "Carafa Special III", titles "Carafa Type 3": score both as the digit.
+_ROMAN = re.compile(r"\b(?:iv|iii|ii|i)\b")
+_ROMAN_DIGITS = {"i": "1", "ii": "2", "iii": "3", "iv": "4"}
 
 
 def normalize(text: str) -> str:
-    """Lowercase and strip packaging sizes so they don't dominate the score."""
+    """Lowercase, strip packaging sizes and turn roman numerals I-IV into digits (scoring only)."""
     out = _PACKAGING.sub(" ", text.lower())
+    out = _ROMAN.sub(lambda m: _ROMAN_DIGITS[m[0]], out)
     out = re.sub(r"\s+([,.;])", r"\1", out)
     out = re.sub(r"(?:[,;]\s*){2,}", ", ", out)
     return _SPACES.sub(" ", out).strip(" ,;.")

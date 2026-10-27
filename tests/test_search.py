@@ -174,7 +174,12 @@ def test_words_that_look_like_origins_do_not_disturb_other_searches(index):
 def test_style_ranks_its_usual_origin_first_and_drops_nothing(index):
     plain = index.search("Pilsner malt", ingredient_type="fermentable", limit=20)
     helles = index.search("Pilsner malt", ingredient_type="fermentable", limit=20, style="Munich Helles")
-    assert {r["handle"] for r in helles} == {r["handle"] for r in plain}
+    # Same candidates in every score group that fits whole (the last one may be cut at the limit).
+    def complete(results):
+        return {r["handle"] for r in results if r["score"] > results[-1]["score"]}
+
+    assert [r["score"] for r in helles] == [r["score"] for r in plain]
+    assert complete(helles) == complete(plain)
     # Among the equally good (top-score) matches; a weaker DE malt stays below them.
     in_stock = [r for r in helles if r["in_stock"] and r["score"] == helles[0]["score"]]
     de_first = [r["origin"] == "DE" for r in in_stock]
@@ -248,3 +253,22 @@ def test_short_query_ranks_the_product_covering_its_words_first(index, query):
         hit = next((r for r in results if r["title"].startswith(neighbour)), None)
         assert hit is None or hit["score"] < results[0]["score"]
     assert all(0 <= r["score"] <= 100 for r in results)
+
+
+def test_normalize_turns_roman_numerals_into_digits():
+    assert normalize("Caramunich II (Weyermann)") == "caramunich 2 (weyermann)"
+    assert normalize("Carafa Special III, 1 kg") == "carafa special 3"
+    assert normalize("Irish moss, 50 g") == "irish moss"  # only whole tokens
+
+
+@pytest.mark.parametrize(
+    ("query", "expected"),
+    [
+        ("Caramunich II (Weyermann)", "Caramunich Type 2 malt - Weyermann"),
+        ("Carafa Special III (Weyermann)", "Carafa Type 3 malt (Special / Dehusked) - Weyermann"),
+    ],
+)
+def test_roman_numeral_in_the_recipe_picks_that_type(index, query, expected):
+    results = index.search(query, ingredient_type="fermentable", limit=5)
+    assert results[0]["title"].startswith(expected)
+    assert results[0]["suggested"] and results[0]["score"] > results[1]["score"]
