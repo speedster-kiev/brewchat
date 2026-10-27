@@ -27,7 +27,7 @@ from brewchat.agent.models import (
 from brewchat.agent.session import Session, current_session
 from brewchat.catalog.pack import units_needed
 from brewchat.catalog.search import CatalogIndex
-from brewchat.config import Settings
+from brewchat.config import Settings, staple_key
 from brewchat.telemetry.session_log import SessionLog
 from brewchat.telemetry.substitution_log import SubstitutionLog
 
@@ -150,6 +150,16 @@ def _session() -> Session:
 # -- pure logic -------------------------------------------------------------
 
 
+def left_out_staples(settings: Settings, session: Session, items: list[OrderListItem]) -> list[str]:
+    """Staple names from the recorded parse plus any staple line the model sent, once each, in recipe order."""
+    names = [ing.name for ing in session.parsed_recipe or []] + [it.ingredient.name for it in items]
+    left_out: list[str] = []
+    for name in names:
+        if settings.is_staple(name) and staple_key(name) not in left_out:
+            left_out.append(staple_key(name))
+    return left_out
+
+
 def render_text(order: OrderList, supplier_name: str, cache_line: str) -> str:
     out: list[str] = [f"Order list for {supplier_name}", ""]
     for n, line in enumerate(order.items, 1):
@@ -170,6 +180,8 @@ def render_text(order: OrderList, supplier_name: str, cache_line: str) -> str:
         if line.substitution and line.source == "substituted":
             out.append(f"   Why: {line.substitution.reason} (confidence: {line.substitution.confidence})")
         out.append(f"   Link: {line.url}")
+    if order.left_out:
+        out += ["", f"Left out, assumed on hand: {', '.join(order.left_out)}"]
     out += [
         "",
         f"Total: {_fmt_money(order.total, order.currency)} ({order.vat_note})",
@@ -185,7 +197,9 @@ def build_order_list_impl(ctx: ToolContext, session: Session, items: list[OrderL
     if not items:
         raise ToolError("build_order_list needs at least one item (one per recipe ingredient).")
     settings = ctx.settings
-    # Pantry staples are assumed on hand: no line, no substitution record (issue #4).
+    # Pantry staples are assumed on hand: no line, no substitution record (issue #4), but the
+    # list says which were left out, from the parse even when the model omitted them (issue #14).
+    left_out = left_out_staples(settings, session, items)
     items = [it for it in items if not settings.is_staple(it.ingredient.name)]
     include_vat = settings.supplier.prices_include_vat
     base_url = settings.supplier.base_url.rstrip("/")
@@ -249,6 +263,7 @@ def build_order_list_impl(ctx: ToolContext, session: Session, items: list[OrderL
         vat_note=settings.supplier.vat_note,
         cache_timestamp=cache_ts.isoformat(),
         handoff_note=HANDOFF_NOTE,
+        left_out=left_out,
         text="",
     )
     order.text = render_text(order, settings.supplier.name, format_cache_timestamp(cache_ts))
@@ -291,14 +306,13 @@ def make_tools(ctx: ToolContext) -> list:
         for ing in ingredients:
             counts[ing.type] = counts.get(ing.type, 0) + 1
         breakdown = ", ".join(f"{n} {t}" for t, n in counts.items())
-        reply = f"Recorded {len(ingredients)} ingredients ({breakdown}). Now search the catalog for each."
-        staples = sorted({ing.name for ing in ingredients if ctx.settings.is_staple(ing.name)})
-        if staples:
-            reply += (
-                f" Pantry staples, assumed on hand: {', '.join(staples)}. Do not search for, list or substitute"
-                " them; at most say in one short sentence that they were left out."
-            )
-        return reply
+        # Pantry staples stay in the recorded parse (the parse eval scores it) but are not named
+        # to the model: it is asked to source only the rest, and build_order_list notes them (issue #14).
+        to_source = list(dict.fromkeys(i.name for i in ingredients if not ctx.settings.is_staple(i.name)))
+        reply = f"Recorded {len(ingredients)} ingredients ({breakdown})."
+        if not to_source:
+            return reply + " Nothing to search for or list: everything in it is assumed on hand."
+        return reply + f" Now search the catalog for each of these and list them: {'; '.join(to_source)}."
 
     @beta_tool
     def search_catalog(
@@ -333,6 +347,13 @@ def make_tools(ctx: ToolContext) -> list:
             limit: Maximum candidates to return (1-20).
             style: Override the recipe's style for this search; normally omit it.
         """
+        if ctx.settings.is_staple(query):
+            # Belt-and-braces for issue #14: same exact-name rule as the parse, so "candi sugar" still searches.
+            return (
+                f'"{query}" is a pantry staple the brewer has on hand: build_order_list leaves it out and'
+                " tells the user. Do not search for, list or substitute it. For a specific brewing sugar,"
+                " search its own name."
+            )
         if style is None:
             style = getattr(current_session.get(None), "style", None)
         if ingredient_type in SUGAR_TYPES:

@@ -50,14 +50,41 @@ def test_submit_parsed_recipe_stores_parse(tools, session):
     assert [i.name for i in session.parsed_recipe] == ["Pilsner malt", "Saaz"]
 
 
-def test_submit_parsed_recipe_keeps_staples_but_names_them(tools, session):
+def test_submit_parsed_recipe_records_staples_but_only_asks_for_the_rest(tools, session):
+    # Issue #14: the parse keeps the staple (parse eval), the model is only told what to source.
     out = tools["submit_parsed_recipe"].call({"ingredients": [
         {"type": "fermentable", "name": "Pilsner malt", "amount": 4.5, "unit": "kg"},
         {"type": "other", "name": "Cane sugar", "amount": 500, "unit": "g"},
         {"type": "other", "name": "Belgian candi sugar", "amount": 500, "unit": "g"},
+        {"type": "hop", "name": "Saaz", "amount": 30, "unit": "g", "timing": "60 min"},
+        {"type": "hop", "name": "Saaz", "amount": 20, "unit": "g", "timing": "5 min"},
     ]})
-    assert [i.name for i in session.parsed_recipe] == ["Pilsner malt", "Cane sugar", "Belgian candi sugar"]
-    assert "Pantry staples, assumed on hand: Cane sugar." in out
+    assert [i.name for i in session.parsed_recipe] == [
+        "Pilsner malt", "Cane sugar", "Belgian candi sugar", "Saaz", "Saaz"]
+    assert out.endswith("search the catalog for each of these and list them: Pilsner malt; Belgian candi sugar; Saaz.")
+    assert "cane" not in out.lower() and "staple" not in out.lower()
+
+
+def test_submit_parsed_recipe_with_only_staples_asks_for_nothing(tools, session):
+    out = tools["submit_parsed_recipe"].call({"ingredients": [
+        {"type": "other", "name": "Table sugar", "amount": 1, "unit": "kg"}]})
+    assert "Nothing to search for" in out and "Table sugar" not in out
+    assert [i.name for i in session.parsed_recipe] == ["Table sugar"]
+
+
+@pytest.mark.parametrize("query", ["cane sugar", "Sugar", "white sugar (granulated)"])
+def test_search_catalog_never_searches_a_staple(tools, session, ctx, monkeypatch, query):
+    def boom(*args, **kwargs):
+        raise AssertionError("the catalog was searched for a staple")
+
+    monkeypatch.setattr(ctx.index, "search", boom)
+    out = tools["search_catalog"].call({"query": query, "ingredient_type": "other"})
+    assert "pantry staple" in out and "candidates" not in out
+
+
+def test_search_catalog_still_searches_brewing_sugars(tools, session):
+    out = json.loads(tools["search_catalog"].call({"query": "candi sugar", "ingredient_type": "other"}))
+    assert out["candidates"][0]["title"].startswith("Candi sugar")
 
 
 def test_submit_parsed_recipe_stores_style(tools, session):

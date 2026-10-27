@@ -309,19 +309,25 @@ def test_d5_origin_pick_needs_the_belgian_pilsner_as_a_match():
 def test_d7_staple_skipped_but_candi_sugar_listed():
     fx = _fx("D7")
     assert "cane sugar" in fx.user_messages[0]
+    parse = {"name": "submit_parsed_recipe", "input": {"ingredients": [
+        {"name": "Pilsner malt"}, {"name": "Belgian candi sugar"}, {"name": "Cane sugar"}]}}
+    note = "Left out, assumed on hand: cane sugar"
 
-    def turn(*names, reply="Here is your list."):
-        return _turn(reply, [PARSE_CALL], {"items": [
+    def turn(*names, calls=(parse,), text=note, reply="Here is your list."):
+        return _turn(reply, list(calls), {"text": f"Order list\n\n{text}\n\nTotal: 1 DKK", "items": [
             {"ingredient_name": n, "source": "matched", "in_stock": True, "product_title": n,
              "product_handle": "/shop/x/"} for n in names
         ]})
 
-    assert evals.evaluate_fixture(fx, [turn("Pilsner malt", "Belgian candi sugar")]).passed
+    search = {"name": "search_catalog", "input": {"query": "candi sugar"}}
+    assert evals.evaluate_fixture(fx, [turn("Pilsner malt", "Belgian candi sugar", calls=(parse, search))]).passed
     assert not evals.evaluate_fixture(fx, [turn("Belgian candi sugar", "cane sugar")]).passed
     assert not evals.evaluate_fixture(fx, [turn("Pilsner malt")]).passed
-    assert evals.evaluate_fixture(  # a short mention of the skipped staple is allowed
-        fx, [turn("Pilsner malt", "Belgian candi sugar", reply="Left out the cane sugar, you likely have it.")]
-    ).passed
+    assert not evals.evaluate_fixture(fx, [turn("Pilsner malt", "Belgian candi sugar", text="")]).passed
+    assert not evals.evaluate_fixture(fx, [turn("Pilsner malt", "Belgian candi sugar", calls=(PARSE_CALL,))]).passed
+    staple_search = {"name": "search_catalog", "input": {"query": "Cane sugar"}}
+    assert not evals.evaluate_fixture(
+        fx, [turn("Pilsner malt", "Belgian candi sugar", calls=(parse, staple_search))]).passed
 
 
 def test_judge_verdict_parsing():
