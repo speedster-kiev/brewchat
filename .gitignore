@@ -24,7 +24,7 @@ build/
 # BrewChat local state (real supplier config, catalog cache, logs, eval replies)
 config/*.local.toml
 data/
-logs/
+/logs/
 evals/results/
 .pytest_cache/
 !.env.example
