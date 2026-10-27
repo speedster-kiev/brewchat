@@ -50,6 +50,16 @@ def test_submit_parsed_recipe_stores_parse(tools, session):
     assert [i.name for i in session.parsed_recipe] == ["Pilsner malt", "Saaz"]
 
 
+def test_submit_parsed_recipe_keeps_staples_but_names_them(tools, session):
+    out = tools["submit_parsed_recipe"].call({"ingredients": [
+        {"type": "fermentable", "name": "Pilsner malt", "amount": 4.5, "unit": "kg"},
+        {"type": "other", "name": "Cane sugar", "amount": 500, "unit": "g"},
+        {"type": "other", "name": "Belgian candi sugar", "amount": 500, "unit": "g"},
+    ]})
+    assert [i.name for i in session.parsed_recipe] == ["Pilsner malt", "Cane sugar", "Belgian candi sugar"]
+    assert "Pantry staples, assumed on hand: Cane sugar." in out
+
+
 def test_submit_parsed_recipe_stores_style(tools, session):
     ingredients = [{"type": "fermentable", "name": "Pilsner malt", "amount": 4.5, "unit": "kg"}]
     tools["submit_parsed_recipe"].call({"ingredients": ingredients, "style": " Munich Helles "})
@@ -145,3 +155,9 @@ def test_search_candidates_carry_pack_size(tools, session):
     out = json.loads(tools["search_catalog"].call({"query": "Maris Otter", "ingredient_type": "fermentable"}))
     sizes = {c["handle"].split("/")[3][:3]: c["pack_size"] for c in out["candidates"]}
     assert sizes["121"] == "100 g" and sizes["122"] == "25 kg"
+
+
+def test_search_catalog_finds_sugars_filed_under_other_when_asked_for_fermentable(tools, session):
+    out = json.loads(tools["search_catalog"].call({"query": "candi sugar", "ingredient_type": "fermentable"}))
+    assert out["candidates"][0]["title"].startswith("Candi sugar")
+    assert {c["ingredient_type"] for c in out["candidates"]} <= {"fermentable", "other"}

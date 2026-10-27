@@ -9,6 +9,7 @@ committed placeholder copy. The app refuses to start without the local file.
 from __future__ import annotations
 
 import os
+import re
 import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -22,6 +23,16 @@ ENV_FILE = REPO_ROOT / ".env"
 
 INGREDIENT_TYPES = ("fermentable", "hop", "yeast", "other")
 DEFAULT_MODEL = "claude-haiku-4-5"  # cheapest current model
+# Used when the config has no [pantry] section (e.g. an older local TOML).
+DEFAULT_PANTRY_STAPLES = (
+    "sugar", "table sugar", "white sugar", "cane sugar", "white cane sugar", "granulated sugar",
+    "caster sugar", "beet sugar", "sucrose", "sukker", "rørsukker", "hvidt sukker", "strøsukker",
+)
+
+
+def staple_key(name: str) -> str:
+    """Normalized ingredient name for the pantry-staple lookup: lowercase, no parentheses."""
+    return " ".join(re.sub(r"\([^)]*\)", " ", name.lower()).split())
 
 
 class ConfigError(RuntimeError):
@@ -58,6 +69,7 @@ class Settings:
     exclude_categories: frozenset[int] = field(default_factory=frozenset)
     origins: dict[str, str] = field(default_factory=dict)  # producer name -> ISO country code
     style_origins: dict[str, tuple[str, ...]] = field(default_factory=dict)  # beer style -> usual origins
+    pantry_staples: frozenset[str] = frozenset(map(staple_key, DEFAULT_PANTRY_STAPLES))
     passphrase: str | None = None
     model: str = DEFAULT_MODEL  # Claude model id, from $BREWCHAT_MODEL
 
@@ -71,6 +83,10 @@ class Settings:
             if sid in self.categories:
                 return self.categories[sid]
         return None
+
+    def is_staple(self, ingredient_name: str) -> bool:
+        """True for ingredients brewers are assumed to have at home (exact name or alias, no fuzzy match)."""
+        return staple_key(ingredient_name) in self.pantry_staples
 
 
 def load_env_file() -> Path | None:
@@ -131,6 +147,7 @@ def load_settings(path: str | Path | None = None, *, base_dir: Path | None = Non
             str(k).strip().lower(): list(v) if isinstance(v, list) else [v]
             for k, v in raw.get("style_origins", {}).items()
         }
+        staples = raw.get("pantry", {}).get("staples", DEFAULT_PANTRY_STAPLES)
     except (KeyError, ValueError, tomllib.TOMLDecodeError) as exc:
         raise ConfigError(f"Supplier config {config_path.name} is malformed: {exc!r}") from exc
 
@@ -161,6 +178,7 @@ def load_settings(path: str | Path | None = None, *, base_dir: Path | None = Non
         exclude_categories=exclude,
         origins=origins,
         style_origins=style_origins,
+        pantry_staples=frozenset(staple_key(str(n)) for n in staples),
         passphrase=os.environ.get("BREWCHAT_PASSPHRASE") or None,
         model=os.environ.get("BREWCHAT_MODEL") or DEFAULT_MODEL,
     )

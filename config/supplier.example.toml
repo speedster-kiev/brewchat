@@ -130,3 +130,15 @@ ids = [137]             # Distillation yeast: tagged "yeast" but not for beer
 "stout" = "GB"
 "west coast ipa" = "US"
 "neipa" = "US"
+
+# Ingredients brewers are assumed to have at home. build_order_list drops them
+# (no order line, no substitution), whatever the agent sends. Matched on the
+# exact ingredient name, lowercased and without parentheses, never fuzzily:
+# candi sugar, muscovado, lactose, dextrose and DME are NOT staples and are
+# still sourced. Language-dependent, so it lives here. Without this section a
+# built-in English/Danish default list is used.
+[pantry]
+staples = [
+    "sugar", "table sugar", "white sugar", "cane sugar", "white cane sugar", "granulated sugar",
+    "caster sugar", "beet sugar", "sucrose", "sukker", "rørsukker", "hvidt sukker", "strøsukker",
+]
