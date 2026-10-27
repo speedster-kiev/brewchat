@@ -823,6 +823,130 @@
    "PacketId": null
   },
   {
+   "Id": 126,
+   "ItemNumber": "HC-0126",
+   "Title": "Pale Ale malt - Weyermann, ebc 6 - 8, pr. 100 g.",
+   "CategoryId": 287,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Pale ale malt",
+   "Stock": 25,
+   "StockWithoutReservation": 25,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 2.5,
+     "PriceMinWithVat": 2.5,
+     "PriceMinWithoutVat": 2.0,
+     "FullPriceMinWithVat": 2.5,
+     "FullPriceMinWithoutVat": 2.0
+    }
+   ],
+   "Handle": "/shop/287-pale-ale-malt/126-pale-ale-malt-weyermann-ebc-6-8-pr-100-g/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 127,
+   "ItemNumber": "HC-0127",
+   "Title": "Bohemian Pilsner malt - Weyermann, ebc 3 - 5, pr. 25 kg.",
+   "CategoryId": 263,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Hele 25 kg. maltsaekke",
+   "Stock": 4,
+   "StockWithoutReservation": 4,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 525.0,
+     "PriceMinWithVat": 525.0,
+     "PriceMinWithoutVat": 420.0,
+     "FullPriceMinWithVat": 525.0,
+     "FullPriceMinWithoutVat": 420.0
+    }
+   ],
+   "Handle": "/shop/263-hele-25-kg-maltsaekke/127-bohemian-pilsner-malt-weyermann-ebc-3-5-pr-25-kg/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 128,
+   "ItemNumber": "HC-0128",
+   "Title": "Abbey malt - Castle Malting, ebc 40 - 50, pr. 100 g.",
+   "CategoryId": 37,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Special malt",
+   "Stock": 20,
+   "StockWithoutReservation": 20,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 3.0,
+     "PriceMinWithVat": 3.0,
+     "PriceMinWithoutVat": 2.4,
+     "FullPriceMinWithVat": 3.0,
+     "FullPriceMinWithoutVat": 2.4
+    }
+   ],
+   "Handle": "/shop/37-special-malt/128-abbey-malt-castle-malting-ebc-40-50-pr-100-g/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 129,
+   "ItemNumber": "HC-0129",
+   "Title": "Acid malt - Weyermann, ebc 3 - 7, pr. 100 g.",
+   "CategoryId": 37,
+   "SecondaryCategoryIds": [
+    "6"
+   ],
+   "CategoryTitle": "Special malt",
+   "Stock": 15,
+   "StockWithoutReservation": 15,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 3.0,
+     "PriceMinWithVat": 3.0,
+     "PriceMinWithoutVat": 2.4,
+     "FullPriceMinWithVat": 3.0,
+     "FullPriceMinWithoutVat": 2.4
+    }
+   ],
+   "Handle": "/shop/37-special-malt/129-acid-malt-weyermann-ebc-3-7-pr-100-g/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
    "Id": 201,
    "ItemNumber": "HC-0201",
    "Title": "Centennial hop pellets, 100 g, alpha 9,5%",

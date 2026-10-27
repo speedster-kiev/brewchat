@@ -2,8 +2,12 @@
 
 The index loads the SQLite cache once per process and reloads it only when
 the cache's ``fetched_at`` changes (i.e. after a sync). Matching is a
-category pre-filter by ingredient type followed by ``rapidfuzz`` WRatio over
+category pre-filter by ingredient type followed by ``rapidfuzz`` scoring of
 lowercased titles with packaging noise ("11,5 g.", "1 kg", "100 g") removed.
+The score is ``token_set_ratio``: a title that contains all of the query's
+words scores 100, one sharing a single word ("malt") scores low (issue #9;
+WRatio gave both the same score). Among equal scores ``token_sort_ratio``
+(closest overall wording) breaks the tie after the origin tiers below.
 Origin words in the query ("Belgian", "UK") are split off before matching and
 only break ties between equally good titles (issue #1, ``catalog/origin.py``).
 So does the recipe's beer style ("Helles" -> German malt first): candidates are
@@ -139,20 +143,21 @@ class CatalogIndex:
             # also scoring the full query means stripping never lowers a score.
             full = utils.default_process(normalize(query))
             for idx, score in self._scores(full, choices).items():
-                scores[idx] = max(score, scores.get(idx, 0.0))
+                scores[idx] = max(score, scores.get(idx, (0.0, 0.0)))
         styled = style_origins(style, self.style_table)
-        # Stable order: score desc, asked-for origin, the style's origin, in-stock, title.
+        # Stable order: score desc, asked-for origin, the style's origin, closest wording, in-stock, title.
         ranked = sorted(
-            ((round(score, 1), idx) for idx, score in scores.items()),
+            ((round(score, 1), round(wording, 1), idx) for idx, (score, wording) in scores.items()),
             key=lambda h: (
                 -h[0],
-                bool(wanted) and self._origin[h[1]] not in wanted,
-                bool(styled) and self._origin[h[1]] not in styled,
-                not self._products[h[1]].in_stock(),
-                self._products[h[1]].title,
+                bool(wanted) and self._origin[h[2]] not in wanted,
+                bool(styled) and self._origin[h[2]] not in styled,
+                -h[1],
+                not self._products[h[2]].in_stock(),
+                self._products[h[2]].title,
             ),
         )
-        out = [self._candidate(idx, score) for score, idx in ranked[:limit]]
+        out = [self._candidate(idx, score) for score, _, idx in ranked[:limit]]
         self._mark_suggestion(out, wanted, styled, style)
         return out
 
@@ -181,11 +186,12 @@ class CatalogIndex:
             pick["why"] = "first of several equally good matches; no origin or style preference decides it"
 
     @staticmethod
-    def _scores(q: str, choices: dict[int, str]) -> dict[int, float]:
+    def _scores(q: str, choices: dict[int, str]) -> dict[int, tuple[float, float]]:
+        """``(token_set_ratio, token_sort_ratio)`` per title clearing the floor on the first."""
         hits = process.extract(
-            q, choices, scorer=fuzz.WRatio, processor=None, limit=None, score_cutoff=SCORE_FLOOR
+            q, choices, scorer=fuzz.token_set_ratio, processor=None, limit=None, score_cutoff=SCORE_FLOOR
         )
-        return {idx: float(score) for _, score, idx in hits}
+        return {idx: (float(score), fuzz.token_sort_ratio(q, title)) for title, score, idx in hits}
 
     def _candidate(self, idx: int, score: float) -> dict[str, Any]:
         p = self._products[idx]
