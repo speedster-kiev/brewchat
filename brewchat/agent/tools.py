@@ -28,8 +28,8 @@ from brewchat.agent.session import Session, current_session
 from brewchat.catalog.pack import units_needed
 from brewchat.catalog.search import CatalogIndex
 from brewchat.config import Settings
-from brewchat.logs.session_log import SessionLog
-from brewchat.logs.substitution_log import SubstitutionLog
+from brewchat.telemetry.session_log import SessionLog
+from brewchat.telemetry.substitution_log import SubstitutionLog
 
 HANDOFF_NOTE = (
     "BrewChat cannot add anything to your cart: the shop has no cart link or API. "
