@@ -29,7 +29,7 @@ phrasing, scoping language, style/origin tie-break wording, etc. all live in
 the same prompt). Don't just re-run the fixture you were fixing:
 
 ```sh
-uv run python scripts/run_evals.py adversarial              # all 19 fixtures (A1-A5, B1-B4, C1-C4, D1-D6)
+uv run python scripts/run_evals.py adversarial              # all 20 fixtures (A1-A5, B1-B4, C1-C4, D1-D7)
 uv run python scripts/run_evals.py adversarial --judge       # add an LLM verdict per fixture
 ```
 

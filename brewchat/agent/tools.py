@@ -31,6 +31,8 @@ from brewchat.config import Settings
 from brewchat.logs.session_log import SessionLog
 from brewchat.logs.substitution_log import SubstitutionLog
 
+SUGAR_TYPES = ("fermentable", "other")
+
 HANDOFF_NOTE = (
     "BrewChat cannot add anything to your cart: the shop has no cart link or API. "
     "Open each link above and add the items to the shop's cart by hand, then check out on the shop's site."
@@ -183,6 +185,8 @@ def build_order_list_impl(ctx: ToolContext, session: Session, items: list[OrderL
     if not items:
         raise ToolError("build_order_list needs at least one item (one per recipe ingredient).")
     settings = ctx.settings
+    # Pantry staples are assumed on hand: no line, no substitution record (issue #4).
+    items = [it for it in items if not settings.is_staple(it.ingredient.name)]
     include_vat = settings.supplier.prices_include_vat
     base_url = settings.supplier.base_url.rstrip("/")
 
@@ -287,7 +291,14 @@ def make_tools(ctx: ToolContext) -> list:
         for ing in ingredients:
             counts[ing.type] = counts.get(ing.type, 0) + 1
         breakdown = ", ".join(f"{n} {t}" for t, n in counts.items())
-        return f"Recorded {len(ingredients)} ingredients ({breakdown}). Now search the catalog for each."
+        reply = f"Recorded {len(ingredients)} ingredients ({breakdown}). Now search the catalog for each."
+        staples = sorted({ing.name for ing in ingredients if ctx.settings.is_staple(ing.name)})
+        if staples:
+            reply += (
+                f" Pantry staples, assumed on hand: {', '.join(staples)}. Do not search for, list or substitute"
+                " them; at most say in one short sentence that they were left out."
+            )
+        return reply
 
     @beta_tool
     def search_catalog(
@@ -317,12 +328,19 @@ def make_tools(ctx: ToolContext) -> list:
         Args:
             query: Ingredient name, optionally with spec words, e.g. "US-05", "Pilsner malt", "Citra".
             ingredient_type: Restrict to fermentable, hop, yeast or other. Use the recipe ingredient's type.
+                fermentable and other both search fermentable and other products (sugars are filed
+                under either).
             limit: Maximum candidates to return (1-20).
             style: Override the recipe's style for this search; normally omit it.
         """
         if style is None:
             style = getattr(current_session.get(None), "style", None)
-        results = ctx.index.search(query, ingredient_type=ingredient_type, limit=limit, style=style)
+        if ingredient_type in SUGAR_TYPES:
+            # Recipes call sugars fermentable; the shop files them under "other". Search both.
+            hits = ctx.index.search(query, limit=20, style=style)
+            results = [c for c in hits if c["ingredient_type"] in SUGAR_TYPES][: max(1, min(limit, 20))]
+        else:
+            results = ctx.index.search(query, ingredient_type=ingredient_type, limit=limit, style=style)
         if not results:
             scope = f" among {ingredient_type} products" if ingredient_type else ""
             return (

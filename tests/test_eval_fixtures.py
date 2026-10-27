@@ -65,7 +65,7 @@ def test_adversarial_parser_finds_all_fixtures():
         {f"A{i}" for i in range(1, 6)}
         | {f"B{i}" for i in range(1, 5)}
         | {f"C{i}" for i in range(1, 5)}
-        | {f"D{i}" for i in range(1, 7)}
+        | {f"D{i}" for i in range(1, 8)}
     )
     assert set(by_id) == expected_ids
     for fid, fx in by_id.items():
@@ -304,6 +304,24 @@ def test_d5_origin_pick_needs_the_belgian_pilsner_as_a_match():
     assert not evals.evaluate_fixture(fx, [turn("substituted", castle)]).passed
     assert not evals.evaluate_fixture(fx, [turn("matched", castle, name="Cara Blond")]).passed
     assert not evals.evaluate_fixture(fx, [_turn("Here is your list.")]).passed  # no list built
+
+
+def test_d7_staple_skipped_but_candi_sugar_listed():
+    fx = _fx("D7")
+    assert "cane sugar" in fx.user_messages[0]
+
+    def turn(*names, reply="Here is your list."):
+        return _turn(reply, [PARSE_CALL], {"items": [
+            {"ingredient_name": n, "source": "matched", "in_stock": True, "product_title": n,
+             "product_handle": "/shop/x/"} for n in names
+        ]})
+
+    assert evals.evaluate_fixture(fx, [turn("Pilsner malt", "Belgian candi sugar")]).passed
+    assert not evals.evaluate_fixture(fx, [turn("Belgian candi sugar", "cane sugar")]).passed
+    assert not evals.evaluate_fixture(fx, [turn("Pilsner malt")]).passed
+    assert evals.evaluate_fixture(  # a short mention of the skipped staple is allowed
+        fx, [turn("Pilsner malt", "Belgian candi sugar", reply="Left out the cane sugar, you likely have it.")]
+    ).passed
 
 
 def test_judge_verdict_parsing():

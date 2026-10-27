@@ -190,3 +190,32 @@ def test_per_pack_items_keep_the_agents_quantity(ctx):
     line = order.items[0]
     assert line.quantity == 2 and line.quantity_requested is None
     assert line.line_total == pytest.approx(79.5)
+
+
+# -- pantry staples (issue #4) ----------------------------------------------
+
+CANDI = "/shop/19-tilsaetning/401-candi-sugar-white-hvid-kandis-500-g/"
+DME = "/shop/290-spraymalt/119-light-dry-malt-extract-spraymalt-1-kg/"
+
+
+@pytest.mark.parametrize("name", ["Cane sugar", "White Cane Sugar", "table sugar (Domino)", "Sukker"])
+def test_pantry_staple_gets_no_line_and_no_substitution_record(ctx, name):
+    session = Session()
+    swap = OrderListItem.model_validate({
+        "ingredient": {"type": "other", "name": name, "amount": 500, "unit": "g"},
+        "product_handle": CANDI, "quantity": 1, "source": "substituted",
+        "substitution": {"original_name": name, "reason": "closest sugar", "confidence": "high"},
+    })
+    order = build_order_list_impl(ctx, session, [_item("Maris Otter", 5, "kg", MO_100G, 50), swap])
+    assert [line.ingredient_name for line in order.items] == ["Maris Otter"]
+    assert name not in order.text
+    assert session.proposals == {}
+    assert not (ctx.settings.logs_dir / "substitutions.jsonl").exists()
+
+
+@pytest.mark.parametrize(("name", "handle"), [
+    ("Belgian candi sugar", CANDI), ("Light DME", DME), ("brown sugar", CANDI), ("Dextrose", CANDI),
+])
+def test_sugars_that_are_not_staples_are_still_listed(ctx, name, handle):
+    order = build_order_list_impl(ctx, Session(), [_item(name, 500, "g", handle, 1, "other")])
+    assert [line.ingredient_name for line in order.items] == [name]

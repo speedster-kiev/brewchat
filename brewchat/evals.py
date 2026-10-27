@@ -778,6 +778,19 @@ def check_suggestion_offered(
     return Check("suggestion_offered", True, picked.note)
 
 
+def check_staple_skipped(turn: dict[str, Any], staple: str, kept: str) -> Check:
+    """D7: a pantry staple has no list line (a short mention in the reply is fine); a real brewing sugar is listed."""
+    items = _order_items(turn)
+    if items is None:
+        return Check("staple_skipped", False, "no list built")
+    names = [(it["name"] or "").lower() for it in items]
+    if any(staple in n for n in names):
+        return Check("staple_skipped", False, f"{staple} is on the list")
+    if not any(kept in n for n in names):
+        return Check("staple_skipped", False, f"{kept} missing from the list")
+    return Check("staple_skipped", True, "")
+
+
 def evaluate_fixture(
     fixture: Fixture,
     turns: list[dict[str, Any]],
@@ -860,6 +873,8 @@ def evaluate_fixture(
             checks.append(check_suggestion_offered(
                 turns[-1] if turns else {}, "pilsner", "bestmalz", ("castle malting", "fuglsang")
             ))
+        elif fixture.id == "D7":
+            checks.append(check_staple_skipped(turns[-1] if turns else {}, "cane sugar", "candi sugar"))
         last_reply = replies[-1] if replies else ""
         redirected = is_redirect(last_reply)
         checks.append(
