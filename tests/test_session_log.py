@@ -1,6 +1,6 @@
 from datetime import UTC, datetime, timedelta
 
-from brewchat.logs.session_log import SessionLog
+from brewchat.telemetry.session_log import SessionLog
 
 T0 = datetime(2026, 9, 18, 12, 0, tzinfo=UTC)
 

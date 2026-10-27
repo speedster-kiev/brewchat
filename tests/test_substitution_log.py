@@ -6,8 +6,8 @@ import pytest
 from brewchat.agent.models import OrderListItem
 from brewchat.agent.session import Session
 from brewchat.agent.tools import ToolContext, build_order_list_impl
-from brewchat.logs.export import export_csv
-from brewchat.logs.substitution_log import FIELDS
+from brewchat.telemetry.export import export_csv
+from brewchat.telemetry.substitution_log import FIELDS
 
 PILS = "/shop/286-pilsner-malt/102-pilsner-malt-ebc-3-5-ebc-1-kg/"
 CITRA = "/shop/51-amerikanske-humle-pellets/205-citra-hop-pellets-100-g-alpha-12-5/"
