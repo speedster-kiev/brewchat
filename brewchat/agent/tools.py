@@ -102,6 +102,38 @@ def quantity_notes(order: OrderList) -> list[str]:
     ]
 
 
+def record_alternatives(session: Session, candidates: list[dict[str, Any]]) -> None:
+    """Remember, per handle, the other in-stock candidates that tie with it at the top score.
+
+    Only a search whose suggestion was one of several equally good matches counts:
+    that is a choice the user should see, whichever of them ends up on the list.
+    """
+    if not candidates:
+        return
+    top = [c for c in candidates if c["score"] == candidates[0]["score"] and c["in_stock"]]
+    if len(top) < 2 or not any(c["suggested"] for c in top):
+        return
+    for c in top:
+        session.alternatives[c["handle"]] = [o for o in top if o is not c]
+
+
+def _fmt_candidate(c: dict[str, Any], currency: str) -> str:
+    origin = c["origin"] or "origin unstated"
+    per = f" per {c['pack_size']}" if c["pack_size"] else ""
+    return f"{c['title']} ({origin}, {_fmt_money(c['price'], currency)}{per})"
+
+
+def alternative_notes(order: OrderList, session: Session) -> list[str]:
+    """One line per matched line that had equally good in-stock alternatives in its search."""
+    notes = []
+    for line in order.items:
+        others = session.alternatives.get(line.product_handle or "") if line.source == "matched" else None
+        if others:
+            alts = "; ".join(_fmt_candidate(c, order.currency) for c in others)
+            notes.append(f"{line.ingredient_name} (listed: {line.product_title}): {alts}")
+    return notes
+
+
 def _source_label(line: OrderLine) -> str:
     original = line.substitution.original_name if line.substitution else line.ingredient_name
     return {
@@ -302,6 +334,7 @@ def make_tools(ctx: ToolContext) -> list:
         session = _session()
         session.parsed_recipe = list(ingredients)
         session.style = (style or "").strip() or None
+        session.alternatives = {}
         counts: dict[str, int] = {}
         for ing in ingredients:
             counts[ing.type] = counts.get(ing.type, 0) + 1
@@ -354,8 +387,9 @@ def make_tools(ctx: ToolContext) -> list:
                 " tells the user. Do not search for, list or substitute it. For a specific brewing sugar,"
                 " search its own name."
             )
+        session = current_session.get(None)
         if style is None:
-            style = getattr(current_session.get(None), "style", None)
+            style = getattr(session, "style", None)
         if ingredient_type in SUGAR_TYPES:
             # Recipes call sugars fermentable; the shop files them under "other". Search both.
             hits = ctx.index.search(query, limit=20, style=style)
@@ -368,6 +402,8 @@ def make_tools(ctx: ToolContext) -> list:
                 f'No match for "{query}"{scope}. Try another spelling, a shorter name, or a broader '
                 "query; if still nothing, treat it as unavailable at this shop."
             )
+        if session is not None:
+            record_alternatives(session, results)
         return json.dumps({"query": query, "ingredient_type": ingredient_type, "candidates": results},
                           ensure_ascii=False)
 
@@ -391,15 +427,20 @@ def make_tools(ctx: ToolContext) -> list:
         Args:
             items: One entry per recipe ingredient, with the chosen product and quantity.
         """
-        order = build_order_list_impl(ctx, _session(), items)
-        notes = quantity_notes(order)
-        if not notes:
-            return order.text
-        return (
-            "Quantities recalculated from pack sizes (already applied in the list below):\n"
-            + "\n".join(f"- {n}" for n in notes)
-            + "\n\n"
-            + order.text
-        )
+        session = _session()
+        order = build_order_list_impl(ctx, session, items)
+        sections = []
+        if notes := quantity_notes(order):
+            sections.append(
+                "Quantities recalculated from pack sizes (already applied in the list below):\n"
+                + "\n".join(f"- {n}" for n in notes)
+            )
+        if notes := alternative_notes(order, session):
+            sections.append(
+                "Equally good in-stock alternatives (the list stays as built). After the list, "
+                "name them in your reply with origin and price and say the user can switch to any of them:\n"
+                + "\n".join(f"- {n}" for n in notes)
+            )
+        return "\n\n".join([*sections, order.text])
 
     return [_report_validation_errors(t) for t in (submit_parsed_recipe, search_catalog, build_order_list)]
