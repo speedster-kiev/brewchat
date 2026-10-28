@@ -27,9 +27,11 @@ from brewchat.agent.models import (
 from brewchat.agent.session import Session, current_session
 from brewchat.catalog.pack import units_needed
 from brewchat.catalog.search import CatalogIndex
-from brewchat.config import Settings
-from brewchat.logs.session_log import SessionLog
-from brewchat.logs.substitution_log import SubstitutionLog
+from brewchat.config import Settings, staple_key
+from brewchat.telemetry.session_log import SessionLog
+from brewchat.telemetry.substitution_log import SubstitutionLog
+
+SUGAR_TYPES = ("fermentable", "other")
 
 HANDOFF_NOTE = (
     "BrewChat cannot add anything to your cart: the shop has no cart link or API. "
@@ -100,6 +102,38 @@ def quantity_notes(order: OrderList) -> list[str]:
     ]
 
 
+def record_alternatives(session: Session, candidates: list[dict[str, Any]]) -> None:
+    """Remember, per handle, the other in-stock candidates that tie with it at the top score.
+
+    Only a search whose suggestion was one of several equally good matches counts:
+    that is a choice the user should see, whichever of them ends up on the list.
+    """
+    if not candidates:
+        return
+    top = [c for c in candidates if c["score"] == candidates[0]["score"] and c["in_stock"]]
+    if len(top) < 2 or not any(c["suggested"] for c in top):
+        return
+    for c in top:
+        session.alternatives[c["handle"]] = [o for o in top if o is not c]
+
+
+def _fmt_candidate(c: dict[str, Any], currency: str) -> str:
+    origin = c["origin"] or "origin unstated"
+    per = f" per {c['pack_size']}" if c["pack_size"] else ""
+    return f"{c['title']} ({origin}, {_fmt_money(c['price'], currency)}{per})"
+
+
+def alternative_notes(order: OrderList, session: Session) -> list[str]:
+    """One line per matched line that had equally good in-stock alternatives in its search."""
+    notes = []
+    for line in order.items:
+        others = session.alternatives.get(line.product_handle or "") if line.source == "matched" else None
+        if others:
+            alts = "; ".join(_fmt_candidate(c, order.currency) for c in others)
+            notes.append(f"{line.ingredient_name} (listed: {line.product_title}): {alts}")
+    return notes
+
+
 def _source_label(line: OrderLine) -> str:
     original = line.substitution.original_name if line.substitution else line.ingredient_name
     return {
@@ -148,6 +182,16 @@ def _session() -> Session:
 # -- pure logic -------------------------------------------------------------
 
 
+def left_out_staples(settings: Settings, session: Session, items: list[OrderListItem]) -> list[str]:
+    """Staple names from the recorded parse plus any staple line the model sent, once each, in recipe order."""
+    names = [ing.name for ing in session.parsed_recipe or []] + [it.ingredient.name for it in items]
+    left_out: list[str] = []
+    for name in names:
+        if settings.is_staple(name) and staple_key(name) not in left_out:
+            left_out.append(staple_key(name))
+    return left_out
+
+
 def render_text(order: OrderList, supplier_name: str, cache_line: str) -> str:
     out: list[str] = [f"Order list for {supplier_name}", ""]
     for n, line in enumerate(order.items, 1):
@@ -168,6 +212,8 @@ def render_text(order: OrderList, supplier_name: str, cache_line: str) -> str:
         if line.substitution and line.source == "substituted":
             out.append(f"   Why: {line.substitution.reason} (confidence: {line.substitution.confidence})")
         out.append(f"   Link: {line.url}")
+    if order.left_out:
+        out += ["", f"Left out, assumed on hand: {', '.join(order.left_out)}"]
     out += [
         "",
         f"Total: {_fmt_money(order.total, order.currency)} ({order.vat_note})",
@@ -183,6 +229,10 @@ def build_order_list_impl(ctx: ToolContext, session: Session, items: list[OrderL
     if not items:
         raise ToolError("build_order_list needs at least one item (one per recipe ingredient).")
     settings = ctx.settings
+    # Pantry staples are assumed on hand: no line, no substitution record (issue #4), but the
+    # list says which were left out, from the parse even when the model omitted them (issue #14).
+    left_out = left_out_staples(settings, session, items)
+    items = [it for it in items if not settings.is_staple(it.ingredient.name)]
     include_vat = settings.supplier.prices_include_vat
     base_url = settings.supplier.base_url.rstrip("/")
 
@@ -245,6 +295,7 @@ def build_order_list_impl(ctx: ToolContext, session: Session, items: list[OrderL
         vat_note=settings.supplier.vat_note,
         cache_timestamp=cache_ts.isoformat(),
         handoff_note=HANDOFF_NOTE,
+        left_out=left_out,
         text="",
     )
     order.text = render_text(order, settings.supplier.name, format_cache_timestamp(cache_ts))
@@ -283,11 +334,18 @@ def make_tools(ctx: ToolContext) -> list:
         session = _session()
         session.parsed_recipe = list(ingredients)
         session.style = (style or "").strip() or None
+        session.alternatives = {}
         counts: dict[str, int] = {}
         for ing in ingredients:
             counts[ing.type] = counts.get(ing.type, 0) + 1
         breakdown = ", ".join(f"{n} {t}" for t, n in counts.items())
-        return f"Recorded {len(ingredients)} ingredients ({breakdown}). Now search the catalog for each."
+        # Pantry staples stay in the recorded parse (the parse eval scores it) but are not named
+        # to the model: it is asked to source only the rest, and build_order_list notes them (issue #14).
+        to_source = list(dict.fromkeys(i.name for i in ingredients if not ctx.settings.is_staple(i.name)))
+        reply = f"Recorded {len(ingredients)} ingredients ({breakdown})."
+        if not to_source:
+            return reply + " Nothing to search for or list: everything in it is assumed on hand."
+        return reply + f" Now search the catalog for each of these and list them: {'; '.join(to_source)}."
 
     @beta_tool
     def search_catalog(
@@ -317,18 +375,35 @@ def make_tools(ctx: ToolContext) -> list:
         Args:
             query: Ingredient name, optionally with spec words, e.g. "US-05", "Pilsner malt", "Citra".
             ingredient_type: Restrict to fermentable, hop, yeast or other. Use the recipe ingredient's type.
+                fermentable and other both search fermentable and other products (sugars are filed
+                under either).
             limit: Maximum candidates to return (1-20).
             style: Override the recipe's style for this search; normally omit it.
         """
+        if ctx.settings.is_staple(query):
+            # Belt-and-braces for issue #14: same exact-name rule as the parse, so "candi sugar" still searches.
+            return (
+                f'"{query}" is a pantry staple the brewer has on hand: build_order_list leaves it out and'
+                " tells the user. Do not search for, list or substitute it. For a specific brewing sugar,"
+                " search its own name."
+            )
+        session = current_session.get(None)
         if style is None:
-            style = getattr(current_session.get(None), "style", None)
-        results = ctx.index.search(query, ingredient_type=ingredient_type, limit=limit, style=style)
+            style = getattr(session, "style", None)
+        if ingredient_type in SUGAR_TYPES:
+            # Recipes call sugars fermentable; the shop files them under "other". Search both.
+            hits = ctx.index.search(query, limit=20, style=style)
+            results = [c for c in hits if c["ingredient_type"] in SUGAR_TYPES][: max(1, min(limit, 20))]
+        else:
+            results = ctx.index.search(query, ingredient_type=ingredient_type, limit=limit, style=style)
         if not results:
             scope = f" among {ingredient_type} products" if ingredient_type else ""
             return (
                 f'No match for "{query}"{scope}. Try another spelling, a shorter name, or a broader '
                 "query; if still nothing, treat it as unavailable at this shop."
             )
+        if session is not None:
+            record_alternatives(session, results)
         return json.dumps({"query": query, "ingredient_type": ingredient_type, "candidates": results},
                           ensure_ascii=False)
 
@@ -352,15 +427,20 @@ def make_tools(ctx: ToolContext) -> list:
         Args:
             items: One entry per recipe ingredient, with the chosen product and quantity.
         """
-        order = build_order_list_impl(ctx, _session(), items)
-        notes = quantity_notes(order)
-        if not notes:
-            return order.text
-        return (
-            "Quantities recalculated from pack sizes (already applied in the list below):\n"
-            + "\n".join(f"- {n}" for n in notes)
-            + "\n\n"
-            + order.text
-        )
+        session = _session()
+        order = build_order_list_impl(ctx, session, items)
+        sections = []
+        if notes := quantity_notes(order):
+            sections.append(
+                "Quantities recalculated from pack sizes (already applied in the list below):\n"
+                + "\n".join(f"- {n}" for n in notes)
+            )
+        if notes := alternative_notes(order, session):
+            sections.append(
+                "Equally good in-stock alternatives (the list stays as built). After the list, "
+                "name them in your reply with origin and price and say the user can switch to any of them:\n"
+                + "\n".join(f"- {n}" for n in notes)
+            )
+        return "\n\n".join([*sections, order.text])
 
     return [_report_validation_errors(t) for t in (submit_parsed_recipe, search_catalog, build_order_list)]

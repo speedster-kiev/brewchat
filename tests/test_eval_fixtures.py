@@ -65,7 +65,7 @@ def test_adversarial_parser_finds_all_fixtures():
         {f"A{i}" for i in range(1, 6)}
         | {f"B{i}" for i in range(1, 5)}
         | {f"C{i}" for i in range(1, 5)}
-        | {f"D{i}" for i in range(1, 7)}
+        | {f"D{i}" for i in range(1, 8)}
     )
     assert set(by_id) == expected_ids
     for fid, fx in by_id.items():
@@ -304,6 +304,33 @@ def test_d5_origin_pick_needs_the_belgian_pilsner_as_a_match():
     assert not evals.evaluate_fixture(fx, [turn("substituted", castle)]).passed
     assert not evals.evaluate_fixture(fx, [turn("matched", castle, name="Cara Blond")]).passed
     assert not evals.evaluate_fixture(fx, [_turn("Here is your list.")]).passed  # no list built
+
+
+def test_d7_staple_skipped_but_candi_sugar_listed():
+    fx = _fx("D7")
+    assert "cane sugar" in fx.user_messages[0]
+    parse = {"name": "submit_parsed_recipe", "input": {"ingredients": [
+        {"name": "Pilsner malt"}, {"name": "Belgian candi sugar"}, {"name": "Cane sugar"}]}}
+    note = "Left out, assumed on hand: cane sugar"
+
+    def turn(*names, calls=(parse,), text=note, reply="Here is your list."):
+        return _turn(reply, list(calls), {"text": f"Order list\n\n{text}\n\nTotal: 1 DKK", "items": [
+            {"ingredient_name": n, "source": "matched", "in_stock": True, "product_title": n,
+             "product_handle": "/shop/x/"} for n in names
+        ]})
+
+    search = {"name": "search_catalog", "input": {"query": "candi sugar"}}
+    assert evals.evaluate_fixture(fx, [turn("Pilsner malt", "Belgian candi sugar", calls=(parse, search))]).passed
+    assert not evals.evaluate_fixture(fx, [turn("Belgian candi sugar", "cane sugar")]).passed
+    assert not evals.evaluate_fixture(fx, [turn("Pilsner malt")]).passed
+    assert not evals.evaluate_fixture(fx, [turn("Pilsner malt", "Belgian candi sugar", text="")]).passed
+    assert not evals.evaluate_fixture(fx, [turn("Pilsner malt", "Belgian candi sugar", calls=(PARSE_CALL,))]).passed
+    refused = {"name": "search_catalog", "input": {"query": "Cane sugar"}}  # search_catalog refuses it in code
+    assert evals.evaluate_fixture(
+        fx, [turn("Pilsner malt", "Belgian candi sugar", calls=(parse, refused))]).passed
+    leaked = {"name": "search_catalog", "input": {"query": "cane sugar substitute"}}
+    assert not evals.evaluate_fixture(
+        fx, [turn("Pilsner malt", "Belgian candi sugar", calls=(parse, leaked))]).passed
 
 
 def test_judge_verdict_parsing():

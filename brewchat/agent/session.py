@@ -25,6 +25,9 @@ class Session:
     # original_name -> proposed product handle/title from the most recent build,
     # so a later build can tell "rejected" from a fresh "unavailable".
     proposals: dict[str, dict[str, str]] = field(default_factory=dict)
+    # product handle -> the other in-stock candidates that scored the same in the
+    # search that returned it, so build_order_list can name them back (issue #1).
+    alternatives: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
     last_seen: float = field(default_factory=time.monotonic)
 
     def touch(self) -> None:

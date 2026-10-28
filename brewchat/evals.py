@@ -16,6 +16,7 @@ from typing import Any
 
 from rapidfuzz import fuzz
 
+from brewchat.config import DEFAULT_PANTRY_STAPLES, staple_key
 from brewchat.units import normalize_unit
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -778,6 +779,35 @@ def check_suggestion_offered(
     return Check("suggestion_offered", True, picked.note)
 
 
+def check_staple_skipped(turn: dict[str, Any], staple: str, kept: str) -> Check:
+    """D7: a pantry staple is in the recorded parse, never reaches the catalog and has no list line;
+    the code-rendered list names it as left out; a real brewing sugar is listed.
+
+    A search whose whole query is a staple name passes: search_catalog refuses it in code
+    without touching the catalog. Any other query containing the staple did search."""
+    calls = turn.get("tool_calls", [])
+    parsed = extract_parsed_ingredients(calls) or []
+    if not any(staple in str(ing.get("name") or "").lower() for ing in parsed):
+        return Check("staple_skipped", False, f"{staple} missing from the parse")
+    staples = {staple_key(s) for s in DEFAULT_PANTRY_STAPLES}  # evals run on the example config
+    searched = [str((c.get("input") or {}).get("query") or "") for c in calls if c.get("name") == "search_catalog"]
+    if any(staple in q.lower() and staple_key(q) not in staples for q in searched):
+        return Check("staple_skipped", False, f"searched the catalog for {staple}")
+    items = _order_items(turn)
+    if items is None:
+        return Check("staple_skipped", False, "no list built")
+    names = [(it["name"] or "").lower() for it in items]
+    if any(staple in n for n in names):
+        return Check("staple_skipped", False, f"{staple} is on the list")
+    if not any(kept in n for n in names):
+        return Check("staple_skipped", False, f"{kept} missing from the list")
+    note = next((ln for ln in ((turn.get("order_list") or {}).get("text") or "").splitlines()
+                 if ln.startswith("Left out, assumed on hand:")), "")
+    if staple not in note.lower():
+        return Check("staple_skipped", False, f"list text has no left-out note for {staple}")
+    return Check("staple_skipped", True, "")
+
+
 def evaluate_fixture(
     fixture: Fixture,
     turns: list[dict[str, Any]],
@@ -860,6 +890,8 @@ def evaluate_fixture(
             checks.append(check_suggestion_offered(
                 turns[-1] if turns else {}, "pilsner", "bestmalz", ("castle malting", "fuglsang")
             ))
+        elif fixture.id == "D7":
+            checks.append(check_staple_skipped(turns[-1] if turns else {}, "cane sugar", "candi sugar"))
         last_reply = replies[-1] if replies else ""
         redirected = is_redirect(last_reply)
         checks.append(

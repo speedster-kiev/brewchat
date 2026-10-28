@@ -123,3 +123,19 @@ def test_model_defaults_and_env_override(monkeypatch):
     assert load_settings(EXAMPLE_CONFIG).model == DEFAULT_MODEL
     monkeypatch.setenv("BREWCHAT_MODEL", "claude-sonnet-5")
     assert load_settings(EXAMPLE_CONFIG).model == "claude-sonnet-5"
+
+
+def test_pantry_staples_from_config_exact_names_only(tmp_path: Path):
+    s = load_settings(EXAMPLE_CONFIG)
+    assert s.is_staple("White Cane Sugar") and s.is_staple("  table  sugar (Domino) ")
+    assert not s.is_staple("Belgian candi sugar") and not s.is_staple("Lactose")
+    cfg = tmp_path / "c.toml"
+    cfg.write_text(EXAMPLE_CONFIG.read_text().replace('"sugar", "table sugar"', '"sugar", "hvidt rørsukker", "table sugar"'))
+    assert load_settings(cfg).is_staple("Hvidt rørsukker")
+
+
+def test_pantry_staples_default_when_section_missing(tmp_path: Path):
+    text = EXAMPLE_CONFIG.read_text()
+    cfg = tmp_path / "c.toml"
+    cfg.write_text(text[: text.index("[pantry]")])
+    assert load_settings(cfg).is_staple("cane sugar")

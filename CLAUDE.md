@@ -36,7 +36,7 @@ Agent: `agent/runner.py` `Runner.run_turn(session, message)` renders the system 
 
 - `submit_parsed_recipe`: structured checkpoint, stores `session.parsed_recipe`.
 - `search_catalog`: wraps `CatalogIndex.search`.
-- `build_order_list`: resolves links, prices by the `prices_include_vat` flag, stamps the cache timestamp, renders the plain-text list, sets `session.order_list`, writes the substitution log and session timing log. Anything that must hold even if the model misbehaves (links, logging, timing) belongs in code here, not in the prompt.
+- `build_order_list`: resolves links, prices by the `prices_include_vat` flag, stamps the cache timestamp, renders the plain-text list, sets `session.order_list`, writes the substitution log and session timing log. Its tool reply also lists, for each `matched` line, the equally good in-stock alternatives from that product's search (`search_catalog` records them in `session.alternatives`), so the model names them after the list (issue #1, fixture D6). Anything that must hold even if the model misbehaves (links, logging, timing) belongs in code here, not in the prompt.
 
 Logs (`logs/`): `substitutions.jsonl` is append-only; a rebuild appends a new record and readers take the last line per `(session_id, original_name)`. Decisions are derived from `session.proposals` (substituted → accepted, user_override → replaced_by_user, unavailable after a prior proposal → rejected). `sessions.sqlite` holds `started_at` / `last_list_built_at` / `lists_built` for the time-to-order metric.
 
