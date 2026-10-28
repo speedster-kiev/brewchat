@@ -126,6 +126,7 @@ ul.items li { border: 1px solid var(--line); border-radius: 10px; padding: 10px 
     <div class="placeholder" id="order-empty">Your list appears here once a recipe has been matched.</div>
     <div id="order-body" hidden>
       <ul class="items" id="items"></ul>
+      <div class="meta" id="left-out" hidden></div>
       <div class="total" style="margin-top:10px"><span>Total</span><span class="price" id="total"></span></div>
       <div class="meta" id="vat"></div>
       <p class="note" id="handoff"></p>
@@ -215,6 +216,9 @@ ul.items li { border: 1px solid var(--line); border-radius: 10px; padding: 10px 
       }
       items.appendChild(li);
     }
+    const leftOut = ol.left_out || [];
+    $("left-out").textContent = leftOut.length ? "Left out, assumed on hand: " + leftOut.join(", ") : "";
+    $("left-out").hidden = !leftOut.length;
     $("total").textContent = money(ol.total, ol.currency);
     $("vat").textContent = ol.vat_note || "";
     $("handoff").textContent = ol.handoff_note || "";

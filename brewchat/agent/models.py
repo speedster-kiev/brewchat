@@ -81,4 +81,6 @@ class OrderList(BaseModel):
     vat_note: str
     cache_timestamp: str
     handoff_note: str
+    # Pantry staples from the recipe, assumed on hand and left off the list (issue #14).
+    left_out: list[str] = Field(default_factory=list)
     text: str = Field(description="Plain-text rendering, copyable in one action.")

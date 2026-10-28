@@ -16,6 +16,7 @@ from typing import Any
 
 from rapidfuzz import fuzz
 
+from brewchat.config import DEFAULT_PANTRY_STAPLES, staple_key
 from brewchat.units import normalize_unit
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -779,7 +780,19 @@ def check_suggestion_offered(
 
 
 def check_staple_skipped(turn: dict[str, Any], staple: str, kept: str) -> Check:
-    """D7: a pantry staple has no list line (a short mention in the reply is fine); a real brewing sugar is listed."""
+    """D7: a pantry staple is in the recorded parse, never reaches the catalog and has no list line;
+    the code-rendered list names it as left out; a real brewing sugar is listed.
+
+    A search whose whole query is a staple name passes: search_catalog refuses it in code
+    without touching the catalog. Any other query containing the staple did search."""
+    calls = turn.get("tool_calls", [])
+    parsed = extract_parsed_ingredients(calls) or []
+    if not any(staple in str(ing.get("name") or "").lower() for ing in parsed):
+        return Check("staple_skipped", False, f"{staple} missing from the parse")
+    staples = {staple_key(s) for s in DEFAULT_PANTRY_STAPLES}  # evals run on the example config
+    searched = [str((c.get("input") or {}).get("query") or "") for c in calls if c.get("name") == "search_catalog"]
+    if any(staple in q.lower() and staple_key(q) not in staples for q in searched):
+        return Check("staple_skipped", False, f"searched the catalog for {staple}")
     items = _order_items(turn)
     if items is None:
         return Check("staple_skipped", False, "no list built")
@@ -788,6 +801,10 @@ def check_staple_skipped(turn: dict[str, Any], staple: str, kept: str) -> Check:
         return Check("staple_skipped", False, f"{staple} is on the list")
     if not any(kept in n for n in names):
         return Check("staple_skipped", False, f"{kept} missing from the list")
+    note = next((ln for ln in ((turn.get("order_list") or {}).get("text") or "").splitlines()
+                 if ln.startswith("Left out, assumed on hand:")), "")
+    if staple not in note.lower():
+        return Check("staple_skipped", False, f"list text has no left-out note for {staple}")
     return Check("staple_skipped", True, "")
 
 
