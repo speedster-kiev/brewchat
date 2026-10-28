@@ -197,7 +197,7 @@ class FakeSessionLog:
     def __init__(self) -> None:
         self.calls: list[str] = []
 
-    def record_message(self, session_id: str, now=None) -> None:
+    def record_message(self, session_id: str, build=None, now=None) -> None:
         self.calls.append(session_id)
 
 

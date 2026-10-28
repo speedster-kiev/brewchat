@@ -225,3 +225,16 @@ def test_missing_api_key_is_reported_clearly():
     status, message = _map_runner_error(exc)
     assert status == 503
     assert "ANTHROPIC_API_KEY" in message
+
+
+def test_version_reports_app_prompt_and_model(client: TestClient, settings: Settings) -> None:
+    from brewchat.agent.prompt import prompt_version
+    from brewchat.version import app_version
+
+    body = client.get("/version").json()
+    assert body == {"version": app_version(), "prompt_version": prompt_version(), "model": settings.model}
+
+
+def test_version_is_behind_the_passphrase(settings: Settings, runner: FakeRunner) -> None:
+    r = TestClient(create_app(settings, runner=runner)).get("/version", follow_redirects=False)
+    assert r.status_code != 200

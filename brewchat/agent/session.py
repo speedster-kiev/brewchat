@@ -28,6 +28,8 @@ class Session:
     # product handle -> the other in-stock candidates that scored the same in the
     # search that returned it, so build_order_list can name them back (issue #1).
     alternatives: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
+    # app_version / prompt_version / model of the latest turn, stamped into the logs (issue #20).
+    build: dict[str, str] = field(default_factory=dict)
     last_seen: float = field(default_factory=time.monotonic)
 
     def touch(self) -> None:

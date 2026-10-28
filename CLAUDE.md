@@ -20,7 +20,7 @@ uv run uvicorn brewchat.web.app:app
 uv run python scripts/run_evals.py parse|adversarial [--only ID] [--judge]   # live API, by hand only
 ```
 
-Env vars are read from a gitignored `.env` (template `.env.example`), loaded by `config.load_env_file()` in the entry points only (never at import, so tests don't see local secrets; real env wins; `BREWCHAT_ENV_FILE=""` disables). Vars: `BREWCHAT_CONFIG` (config path override), `BREWCHAT_LOGS_DIR`, `BREWCHAT_PASSPHRASE` (required by the web app), `BREWCHAT_SECRET_KEY` (cookie signing, else derived from passphrase), `BREWCHAT_MODEL` (agent + evals model; `Settings.model`, `run_evals.py --model` overrides), `ANTHROPIC_API_KEY`.
+Env vars are read from a gitignored `.env` (template `.env.example`), loaded by `config.load_env_file()` in the entry points only (never at import, so tests don't see local secrets; real env wins; `BREWCHAT_ENV_FILE=""` disables). Vars: `BREWCHAT_CONFIG` (config path override), `BREWCHAT_LOGS_DIR`, `BREWCHAT_PASSPHRASE` (required by the web app), `BREWCHAT_SECRET_KEY` (cookie signing, else derived from passphrase), `BREWCHAT_MODEL` (agent + evals model; `Settings.model`, `run_evals.py --model` overrides), `BREWCHAT_GIT_COMMIT` (commit for the app version where there is no `.git`, set as a Docker build arg), `ANTHROPIC_API_KEY`.
 
 ## Supplier anonymization (hard requirement)
 
@@ -38,9 +38,15 @@ Agent: `agent/runner.py` `Runner.run_turn(session, message)` renders the system 
 - `search_catalog`: wraps `CatalogIndex.search`.
 - `build_order_list`: resolves links, prices by the `prices_include_vat` flag, stamps the cache timestamp, renders the plain-text list, sets `session.order_list`, writes the substitution log and session timing log. Its tool reply also lists, for each `matched` line, the equally good in-stock alternatives from that product's search (`search_catalog` records them in `session.alternatives`), so the model names them after the list (issue #1, fixture D6). Anything that must hold even if the model misbehaves (links, logging, timing) belongs in code here, not in the prompt.
 
-Logs (`logs/`): `substitutions.jsonl` is append-only; a rebuild appends a new record and readers take the last line per `(session_id, original_name)`. Decisions are derived from `session.proposals` (substituted → accepted, user_override → replaced_by_user, unavailable after a prior proposal → rejected). `sessions.sqlite` holds `started_at` / `last_list_built_at` / `lists_built` for the time-to-order metric.
+Logs (`logs/`): `substitutions.jsonl` is append-only; a rebuild appends a new record and readers take the last line per `(session_id, original_name)`. Decisions are derived from `session.proposals` (substituted → accepted, user_override → replaced_by_user, unavailable after a prior proposal → rejected). `sessions.sqlite` holds `started_at` / `last_list_built_at` / `lists_built` for the time-to-order metric. Both, and every `evals/results/*.jsonl` record, also carry `app_version` / `prompt_version` / `model` (see Versioning).
 
 Web (`web/`): `create_app(settings, runner)`; module-level `app` is created lazily via module `__getattr__` so tests can import without a local config. A passphrase gate middleware protects everything except `/login` and `/robots.txt`. `POST /chat {session_id?, message}` → `{session_id, reply, order_list, cache_timestamp}`, runner executed in a threadpool under a per-session lock; errors map to short JSON messages in `_map_runner_error`. `web/static/index.html` is a single framework-free page.
+
+## Versioning
+
+The app version is SemVer from `pyproject.toml` plus the short commit: `0.2.0+8f4c580` (`brewchat/version.py`; the commit is left off when neither `BREWCHAT_GIT_COMMIT` nor `git` gives one). The prompt version is the first 8 hex of a SHA-256 of the `system-prompt.md` template (`agent/prompt.py` `prompt_version`), so a prompt edit is traceable without a version bump. The runner stamps both, with the model, onto `Session.build` each turn; the logs read it from there. `GET /version` (behind the passphrase) returns them and the page shows them under the order list.
+
+Releasing: bump `version` in `pyproject.toml` (patch for fixes, minor for features, major for a breaking change to logs, config or the `/chat` contract), run `uv lock`, merge, then tag main `vX.Y.Z`.
 
 ## Things that are easy to get wrong
 

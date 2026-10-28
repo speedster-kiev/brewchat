@@ -20,10 +20,11 @@ from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
 
 from brewchat.agent.models import OrderList
-from brewchat.agent.prompt import PromptError
+from brewchat.agent.prompt import PromptError, prompt_version
 from brewchat.catalog.store import CacheMissingError
 from brewchat.config import ConfigError, Settings, load_env_file, load_settings
 from brewchat.web.auth import install_auth
+from brewchat.version import app_version
 from brewchat.web.sessions import SessionStore
 
 if TYPE_CHECKING:
@@ -38,6 +39,12 @@ MAX_MESSAGE_CHARS = 50_000
 class ChatRequest(BaseModel):
     session_id: str | None = Field(default=None, max_length=100)
     message: str = Field(min_length=1, max_length=MAX_MESSAGE_CHARS)
+
+
+class VersionResponse(BaseModel):
+    version: str
+    prompt_version: str
+    model: str
 
 
 class ChatResponse(BaseModel):
@@ -104,9 +111,23 @@ def create_app(settings: Settings | None = None, runner: Runner | None = None) -
 
     app.state.get_runner = get_runner
 
+    def build_info() -> VersionResponse:
+        # Read per call: the prompt is re-read when system-prompt.md changes.
+        return VersionResponse(version=app_version(), prompt_version=prompt_version(), model=settings.model)
+
+    # uvicorn configures its own loggers only, so the startup line goes through one of them.
+    info = build_info()
+    logging.getLogger("uvicorn.error").info(
+        "BrewChat %s (prompt %s, model %s)", info.version, info.prompt_version, info.model
+    )
+
     @app.get("/", include_in_schema=False)
     async def index() -> FileResponse:
         return FileResponse(STATIC_DIR / "index.html", media_type="text/html")
+
+    @app.get("/version", response_model=VersionResponse)
+    async def version() -> VersionResponse:
+        return build_info()
 
     @app.post("/chat", response_model=ChatResponse)
     async def chat(req: ChatRequest):

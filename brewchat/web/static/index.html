@@ -136,6 +136,7 @@ ul.items li { border: 1px solid var(--line); border-radius: 10px; padding: 10px 
       </div>
     </div>
     <div class="footer" id="cache-ts"></div>
+    <div class="footer" id="version"></div>
   </aside>
 </main>
 <script>
@@ -302,6 +303,10 @@ ul.items li { border: 1px solid var(--line); border-radius: 10px; padding: 10px 
     $("order-body").hidden = true; $("order-empty").hidden = false; setCacheTs("");
     input.focus();
   });
+
+  fetch("/version").then((r) => r.ok ? r.json() : null).then((v) => {
+    if (v) $("version").textContent = "BrewChat " + v.version + " · prompt " + v.prompt_version + " · " + v.model;
+  }).catch(() => {});
 
   input.focus();
 })();
