@@ -1,6 +1,6 @@
 [project]
 name = "brewchat"
-version = "0.1.0"
+version = "0.2.0"
 description = "Turns a pasted beer recipe into a priced shopping list from a cached supplier catalog."
 readme = "README.md"
 requires-python = ">=3.12"

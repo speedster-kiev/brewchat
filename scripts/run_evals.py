@@ -28,6 +28,11 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from brewchat import evals
+from brewchat.agent.prompt import prompt_version
+from brewchat.version import app_version
+
+# Which code and prompt produced a result (issue #20); the model is recorded per run.
+BUILD = {"app_version": app_version(), "prompt_version": prompt_version()}
 
 # USD per million tokens (input, output), for the cost estimate printed after a
 # run. Cache writes bill at 1.25x input (5-minute TTL), cache reads at 0.1x.
@@ -241,6 +246,7 @@ def run_parse(args: argparse.Namespace) -> int:
                     else "fail",
                     "notes": notes,
                     "model": args.model,
+                    **BUILD,
                     "seconds": round(time.monotonic() - started, 1),
                 }
             )
@@ -378,6 +384,7 @@ def run_adversarial(args: argparse.Namespace) -> int:
                     "notes": verdict.notes + ([error] if error else []),
                     "judge": judge_result,
                     "model": args.model,
+                    **BUILD,
                 }
             )
             rows.append((fx, verdict, judge_note))

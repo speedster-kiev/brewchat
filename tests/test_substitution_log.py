@@ -125,3 +125,11 @@ def test_export_csv_one_row_per_session_and_original(ctx, tmp_path):
     assert final[(s2.session_id, "Galaxy")]["decision"] == "replaced_by_user"
     assert final[(s2.session_id, "Galaxy")]["final_handle"] == NELSON
     assert list(rows[0]) == list(FIELDS)
+
+
+def test_records_carry_the_build_that_made_them(ctx):
+    session = Session()
+    session.build = {"app_version": "0.2.0+abc1234", "prompt_version": "1b80e62c", "model": "claude-haiku-4-5"}
+    build_order_list_impl(ctx, session, [matched_pils(), hop("Galaxy", "substituted", CITRA)])
+    (rec,) = records(ctx)
+    assert {k: rec[k] for k in session.build} == session.build

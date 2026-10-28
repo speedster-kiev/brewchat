@@ -8,6 +8,7 @@ deliberately never available to the template.
 
 from __future__ import annotations
 
+import hashlib
 import re
 from datetime import UTC, datetime
 from functools import lru_cache
@@ -46,6 +47,11 @@ def load_template(path: Path = SYSTEM_PROMPT_DOC) -> str:
     except FileNotFoundError as exc:
         raise PromptError(f"System prompt document not found: {path.name}") from exc
     return _load_template_cached(str(path), mtime)
+
+
+def prompt_version(path: Path = SYSTEM_PROMPT_DOC) -> str:
+    """Short hash of the prompt template, so a prompt edit is traceable without a code change."""
+    return hashlib.sha256(load_template(path).encode("utf-8")).hexdigest()[:8]
 
 
 def format_cache_timestamp(ts: datetime | str) -> str:

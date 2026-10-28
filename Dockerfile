@@ -6,6 +6,8 @@
 #   BREWCHAT_SECRET_KEY      cookie signing key (optional, derived from passphrase if unset)
 #   ANTHROPIC_API_KEY
 # Mount a volume at /app/data and /app/logs so the cache and logs survive restarts.
+# The image has no .git, so pass the commit for the app version (issue #20):
+#   docker build --build-arg BREWCHAT_GIT_COMMIT=$(git rev-parse --short HEAD) .
 FROM python:3.12-slim
 
 COPY --from=ghcr.io/astral-sh/uv:0.11 /uv /usr/local/bin/uv
@@ -21,6 +23,8 @@ COPY system-prompt.md ./
 COPY docker/entrypoint.sh ./docker/
 RUN uv sync --frozen --no-dev && chmod +x docker/entrypoint.sh
 
+ARG BREWCHAT_GIT_COMMIT=""
+ENV BREWCHAT_GIT_COMMIT=$BREWCHAT_GIT_COMMIT
 ENV PORT=8000
 EXPOSE 8000
 ENTRYPOINT ["./docker/entrypoint.sh"]

@@ -18,8 +18,9 @@ from typing import TYPE_CHECKING, Any
 import anthropic
 
 from brewchat.agent.models import OrderList
-from brewchat.agent.prompt import render_system_prompt
+from brewchat.agent.prompt import prompt_version, render_system_prompt
 from brewchat.agent.session import Session, current_session
+from brewchat.version import app_version
 
 if TYPE_CHECKING:
     from brewchat.agent.tools import ToolContext
@@ -256,7 +257,10 @@ class Runner:
         token = current_session.set(session)
         try:
             session.touch()
-            self.ctx.session_log.record_message(session.session_id)
+            session.build = {
+                "app_version": app_version(), "prompt_version": prompt_version(), "model": self.model,
+            }
+            self.ctx.session_log.record_message(session.session_id, session.build)
             raw_ts = self.ctx.index.cache_timestamp
             cache_ts = raw_ts if isinstance(raw_ts, str) else raw_ts.isoformat()
             system_prompt = render_system_prompt(self.ctx.settings, raw_ts)

@@ -89,7 +89,7 @@ See [`evals/README.md`](./evals/README.md) for pass bars and how results are rec
 One small container (Render, Railway, or similar) behind the passphrase gate. The image runs the web app and a once-a-day catalog sync loop; the real supplier config is passed in as a secret, never baked into the image.
 
 ```sh
-docker build -t brewchat .
+docker build --build-arg BREWCHAT_GIT_COMMIT=$(git rev-parse --short HEAD) -t brewchat .
 docker run -p 8000:8000 \
   -e BREWCHAT_SUPPLIER_TOML="$(cat config/supplier.local.toml)" \
   -e BREWCHAT_PASSPHRASE=... -e ANTHROPIC_API_KEY=... \

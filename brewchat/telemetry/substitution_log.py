@@ -4,7 +4,8 @@ One record per proposed substitution per ``build_order_list`` call. A later
 build in the same session for the same original ingredient appends a new line
 with the updated decision; readers take the last line per
 ``(session_id, original_name)``. Records carry only product handles, never the
-shop's base URL, and no user identity beyond the random session id.
+shop's base URL, and no user identity beyond the random session id. Each record
+also names the build that produced it (app version, prompt version, model).
 
 Decision derivation:
 - ``substituted``   -> ``accepted``          (final_handle = proposed handle)
@@ -37,6 +38,9 @@ FIELDS = (
     "decision",
     "final_handle",
     "cache_timestamp",
+    "app_version",
+    "prompt_version",
+    "model",
 )
 
 
@@ -80,6 +84,7 @@ class SubstitutionLog:
                 "timestamp": ts,
                 "original_spec": item.ingredient.spec,
                 "cache_timestamp": cache_timestamp,
+                **session.build,
             }
             if item.source == "substituted" and sub is not None:
                 handle = item.product_handle or ""
