@@ -104,8 +104,8 @@ def test_reloads_when_fetched_at_changes(settings, sample_raw, catalog_cache, in
 # -- origin (issue #1) ----------------------------------------------------------
 
 
-# The synthetic catalog has four pilsner malts (BE, DE, DK, none), so ask for four.
-N_PILSNERS = 4
+# The synthetic catalog has five pilsner malts (BE, DE twice, DK, none), so ask for five.
+N_PILSNERS = 5
 
 
 def _all_pilsner(results):
@@ -174,8 +174,14 @@ def test_words_that_look_like_origins_do_not_disturb_other_searches(index):
 def test_style_ranks_its_usual_origin_first_and_drops_nothing(index):
     plain = index.search("Pilsner malt", ingredient_type="fermentable", limit=20)
     helles = index.search("Pilsner malt", ingredient_type="fermentable", limit=20, style="Munich Helles")
-    assert {r["handle"] for r in helles} == {r["handle"] for r in plain}
-    in_stock = [r for r in helles if r["in_stock"]]
+    # Same candidates in every score group that fits whole (the last one may be cut at the limit).
+    def complete(results):
+        return {r["handle"] for r in results if r["score"] > results[-1]["score"]}
+
+    assert [r["score"] for r in helles] == [r["score"] for r in plain]
+    assert complete(helles) == complete(plain)
+    # Among the equally good (top-score) matches; a weaker DE malt stays below them.
+    in_stock = [r for r in helles if r["in_stock"] and r["score"] == helles[0]["score"]]
     de_first = [r["origin"] == "DE" for r in in_stock]
     assert de_first[0] and de_first == sorted(de_first, reverse=True)  # every DE one before any other
     assert {r["origin"] for r in helles} >= {"DE", "BE", "DK"}  # the alternatives are still there
@@ -230,3 +236,39 @@ def test_no_suggestion_when_nothing_at_the_top_score_is_in_stock(settings, sampl
     only = index.search("Pilsner Malt - Castle Malting", ingredient_type="fermentable", limit=1)
     assert only[0]["origin"] == "BE" and only[0]["in_stock"] is False
     assert only[0]["suggested"] is False
+
+
+# -- scoring (issue #9) -----------------------------------------------------------
+
+
+@pytest.mark.parametrize("query", ["Pale Malt (Weyermann)", "Pale Ale malt Weyermann"])
+def test_short_query_ranks_the_product_covering_its_words_first(index, query):
+    # WRatio scored every title sharing one word ("malt") alike, so the alphabetical
+    # tie-break put Abbey/Acid malt and the Weyermann pilsner sack above the real match.
+    results = index.search(query, limit=20)
+    titles = [r["title"] for r in results]
+    assert titles[0].startswith("Pale Ale malt - Weyermann")
+    assert results[0]["suggested"] and results[0]["score"] > results[1]["score"]
+    for neighbour in ("Bohemian Pilsner malt - Weyermann", "Abbey malt", "Acid malt - Weyermann"):
+        hit = next((r for r in results if r["title"].startswith(neighbour)), None)
+        assert hit is None or hit["score"] < results[0]["score"]
+    assert all(0 <= r["score"] <= 100 for r in results)
+
+
+def test_normalize_turns_roman_numerals_into_digits():
+    assert normalize("Caramunich II (Weyermann)") == "caramunich 2 (weyermann)"
+    assert normalize("Carafa Special III, 1 kg") == "carafa special 3"
+    assert normalize("Irish moss, 50 g") == "irish moss"  # only whole tokens
+
+
+@pytest.mark.parametrize(
+    ("query", "expected"),
+    [
+        ("Caramunich II (Weyermann)", "Caramunich Type 2 malt - Weyermann"),
+        ("Carafa Special III (Weyermann)", "Carafa Type 3 malt (Special / Dehusked) - Weyermann"),
+    ],
+)
+def test_roman_numeral_in_the_recipe_picks_that_type(index, query, expected):
+    results = index.search(query, ingredient_type="fermentable", limit=5)
+    assert results[0]["title"].startswith(expected)
+    assert results[0]["suggested"] and results[0]["score"] > results[1]["score"]

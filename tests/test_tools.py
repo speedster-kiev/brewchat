@@ -216,7 +216,8 @@ def test_build_order_list_names_equally_good_alternatives_to_the_suggestion(tool
     assert "Pilsner Malt - Castle Malting, ebc 3 - 5, pr. 100 g. (BE, 2.50 DKK per 100 g)" in head
     assert "Pilsner Malt - Fuglsang, ebc 4, pr. 100 g. (DK, 2.50 DKK per 100 g)" in head
     assert "Pilsner Malt, ebc 3 - 5 EBC, 1 kg (origin unstated, 20.00 DKK per 1 kg)" in head
-    assert "(DE," not in head  # the listed product is not its own alternative
+    assert "Bohemian Pilsner malt - Weyermann, ebc 3 - 5, pr. 25 kg. (DE, 525.00 DKK per 25 kg)" in head
+    assert head.count("Bestmalz") == 1  # the listed product is not its own alternative
     assert rest == session.order_list.text  # the copyable list itself is unchanged
 
 
