@@ -5,7 +5,7 @@ from anthropic.lib.tools import ToolError
 
 from brewchat.agent.models import Ingredient, OrderListItem
 from brewchat.agent.session import Session
-from brewchat.agent.tools import HANDOFF_NOTE, ToolContext, build_order_list_impl
+from brewchat.agent.tools import HANDOFF_NOTE, ToolContext, build_order_list_impl, merge_duplicate_items
 
 PILS = "/shop/286-pilsner-malt/102-pilsner-malt-ebc-3-5-ebc-1-kg/"
 US05 = "/shop/8-gaer/301-fermentis-safale-us-05-11-5-g-dry-yeast/"
@@ -190,6 +190,72 @@ def test_per_pack_items_keep_the_agents_quantity(ctx):
     line = order.items[0]
     assert line.quantity == 2 and line.quantity_requested is None
     assert line.line_total == pytest.approx(79.5)
+
+
+# -- repeated additions of one ingredient (issue #10) --------------------------
+
+
+def _hop(amount, unit, handle, timing, name="Citra") -> OrderListItem:
+    return OrderListItem.model_validate({
+        "ingredient": {"type": "hop", "name": name, "amount": amount, "unit": unit, "timing": timing},
+        "product_handle": handle, "quantity": 1, "source": "matched",
+    })
+
+
+def test_same_hop_on_two_products_becomes_one_line(ctx):
+    # Two Citra additions resolved to two different Citra listings: one line, first product, 60 g.
+    session = Session()
+    order = build_order_list_impl(ctx, session, [
+        _hop(30, "g", CITRA, "60 min"), _hop(30, "g", CITRA_300G, "dry hop", name=" citra "),
+    ])
+    assert len(order.items) == 1
+    line = order.items[0]
+    assert line.product_handle == CITRA
+    assert line.ingredient_amount == 60 and line.ingredient_unit == "g"
+    assert line.quantity == 1  # 60 g in 100 g packs, not 1 + 1
+    assert order.total == pytest.approx(65.0)
+    assert "For: Citra (60 g); buying 1 x 100 g" in order.text
+    assert session.order_list is order
+
+
+def test_amounts_added_across_units_then_rounded_once(ctx):
+    order = build_order_list_impl(ctx, Session(), [
+        _hop(0.06, "kg", CITRA, "60 min"), _hop(60, "g", CITRA, "flameout"), _hop(60, "g", CITRA, "dry hop"),
+    ])
+    assert len(order.items) == 1
+    assert order.items[0].ingredient_amount == pytest.approx(180) and order.items[0].ingredient_unit == "g"
+    assert order.items[0].quantity == 2  # 180 g -> 2 x 100 g, not 3
+
+
+def test_same_handle_under_different_names_is_merged(ctx):
+    order = build_order_list_impl(ctx, Session(), [
+        _hop(30, "g", CITRA, "60 min", name="Citra"), _hop(30, "g", CITRA, "dry hop", name="Citra (US)"),
+    ])
+    assert len(order.items) == 1
+    assert order.items[0].ingredient_name == "Citra" and order.items[0].quantity == 1
+
+
+def test_per_pack_quantities_are_summed(ctx):
+    order = build_order_list_impl(ctx, Session(), [
+        _item("US-05", 1, "pack", US05, 1, "yeast"), _item("US-05", 1, "pack", US05, 2, "yeast"),
+    ])
+    assert len(order.items) == 1
+    assert order.items[0].quantity == 3 and order.items[0].ingredient_amount == 2
+
+
+def test_different_ingredients_and_incompatible_units_stay_separate(ctx):
+    order = build_order_list_impl(ctx, Session(), [
+        _hop(30, "g", CITRA, "60 min"), _hop(30, "g", MOSAIC, "60 min", name="Mosaic"),
+        _item("US-05", 1, "pack", US05, 1, "yeast"), _item("US-05", 11.5, "g", US05, 1, "yeast"),
+    ])
+    assert [line.ingredient_name for line in order.items] == ["Citra", "Mosaic", "US-05", "US-05"]
+
+
+def test_timings_of_merged_additions_are_joined():
+    merged = merge_duplicate_items([
+        _hop(30, "g", CITRA, "60 min"), _hop(30, "g", CITRA, "dry hop"), _hop(30, "g", CITRA, "60 min"),
+    ])
+    assert len(merged) == 1 and merged[0].ingredient.timing == "60 min, dry hop"
 
 
 # -- pantry staples (issue #4) ----------------------------------------------

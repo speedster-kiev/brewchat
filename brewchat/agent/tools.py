@@ -30,6 +30,7 @@ from brewchat.catalog.search import CatalogIndex
 from brewchat.config import Settings, staple_key
 from brewchat.telemetry.session_log import SessionLog
 from brewchat.telemetry.substitution_log import SubstitutionLog
+from brewchat.units import normalize_unit
 
 SUGAR_TYPES = ("fermentable", "other")
 
@@ -181,6 +182,51 @@ def _session() -> Session:
 
 # -- pure logic -------------------------------------------------------------
 
+_CANONICAL_UNIT = {"mass": "g", "volume": "ml"}
+
+
+def _same_ingredient(a: OrderListItem, b: OrderListItem) -> bool:
+    def key(it: OrderListItem) -> tuple[str, str]:
+        return it.ingredient.type, " ".join(it.ingredient.name.lower().split())
+
+    return key(a) == key(b) or (a.product_handle is not None and a.product_handle == b.product_handle)
+
+
+def _combine(a: OrderListItem, b: OrderListItem) -> OrderListItem | None:
+    """``a`` with ``b``'s amount added, or ``None`` if their units can't be added."""
+    fam_a, base_a = normalize_unit(a.ingredient.amount, a.ingredient.unit)
+    fam_b, base_b = normalize_unit(b.ingredient.amount, b.ingredient.unit)
+    if fam_a != fam_b:
+        return None
+    if a.ingredient.unit.strip().lower() == b.ingredient.unit.strip().lower() or fam_a not in _CANONICAL_UNIT:
+        amount, unit = a.ingredient.amount + b.ingredient.amount, a.ingredient.unit
+    else:
+        amount, unit = round(base_a + base_b, 6), _CANONICAL_UNIT[fam_a]
+    parts = [p for t in (a.ingredient.timing, b.ingredient.timing) if t for p in t.split(", ")]
+    timing = ", ".join(dict.fromkeys(parts)) or None
+    ingredient = a.ingredient.model_copy(update={"amount": amount, "unit": unit, "timing": timing})
+    return a.model_copy(update={"ingredient": ingredient, "quantity": a.quantity + b.quantity})
+
+
+def merge_duplicate_items(items: list[OrderListItem]) -> list[OrderListItem]:
+    """Merge repeated additions of one ingredient into a single item (issue #10).
+
+    Items match on type + name (case/whitespace-insensitive) or on product handle.
+    The first item's product, source and substitution win; amounts are summed
+    across compatible units so the pack quantity is computed once from the total,
+    and quantities are summed for per-pack items. Items whose units can't be
+    added (e.g. "1 pack" and "11 g") stay separate.
+    """
+    merged: list[OrderListItem] = []
+    for it in items:
+        for i, prev in enumerate(merged):
+            if _same_ingredient(prev, it) and (combined := _combine(prev, it)) is not None:
+                merged[i] = combined
+                break
+        else:
+            merged.append(it)
+    return merged
+
 
 def left_out_staples(settings: Settings, session: Session, items: list[OrderListItem]) -> list[str]:
     """Staple names from the recorded parse plus any staple line the model sent, once each, in recipe order."""
@@ -225,7 +271,7 @@ def render_text(order: OrderList, supplier_name: str, cache_line: str) -> str:
 
 
 def build_order_list_impl(ctx: ToolContext, session: Session, items: list[OrderListItem]) -> OrderList:
-    """Resolve handles, price and render the list, store it on the session, write the logs."""
+    """Resolve handles, merge repeated ingredients, price and render the list, store it, write the logs."""
     if not items:
         raise ToolError("build_order_list needs at least one item (one per recipe ingredient).")
     settings = ctx.settings
@@ -248,6 +294,7 @@ def build_order_list_impl(ctx: ToolContext, session: Session, items: list[OrderL
             + ". Call search_catalog again and use a handle exactly as it returns it."
         )
 
+    items = merge_duplicate_items(items)
     lines: list[OrderLine] = []
     for it in items:
         product = None if it.source == "unavailable" else ctx.index.get(it.product_handle or "")
