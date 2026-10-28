@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 from brewchat.config import ConfigError, load_env_file, load_settings
-from brewchat.logs.export import export_csv
+from brewchat.telemetry.export import export_csv
 
 
 def main(argv: list[str] | None = None) -> int:

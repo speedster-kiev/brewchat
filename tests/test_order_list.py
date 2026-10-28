@@ -3,7 +3,7 @@ import dataclasses
 import pytest
 from anthropic.lib.tools import ToolError
 
-from brewchat.agent.models import OrderListItem
+from brewchat.agent.models import Ingredient, OrderListItem
 from brewchat.agent.session import Session
 from brewchat.agent.tools import HANDOFF_NOTE, ToolContext, build_order_list_impl, merge_duplicate_items
 
@@ -256,3 +256,54 @@ def test_timings_of_merged_additions_are_joined():
         _hop(30, "g", CITRA, "60 min"), _hop(30, "g", CITRA, "dry hop"), _hop(30, "g", CITRA, "60 min"),
     ])
     assert len(merged) == 1 and merged[0].ingredient.timing == "60 min, dry hop"
+
+
+# -- pantry staples (issue #4) ----------------------------------------------
+
+CANDI = "/shop/19-tilsaetning/401-candi-sugar-white-hvid-kandis-500-g/"
+DME = "/shop/290-spraymalt/119-light-dry-malt-extract-spraymalt-1-kg/"
+
+
+@pytest.mark.parametrize("name", ["Cane sugar", "White Cane Sugar", "table sugar (Domino)", "Sukker"])
+def test_pantry_staple_gets_no_line_and_no_substitution_record(ctx, name):
+    session = Session()
+    swap = OrderListItem.model_validate({
+        "ingredient": {"type": "other", "name": name, "amount": 500, "unit": "g"},
+        "product_handle": CANDI, "quantity": 1, "source": "substituted",
+        "substitution": {"original_name": name, "reason": "closest sugar", "confidence": "high"},
+    })
+    order = build_order_list_impl(ctx, session, [_item("Maris Otter", 5, "kg", MO_100G, 50), swap])
+    assert [line.ingredient_name for line in order.items] == ["Maris Otter"]
+    assert "Why:" not in order.text and "substituted" not in order.text
+    assert session.proposals == {}
+    assert not (ctx.settings.logs_dir / "substitutions.jsonl").exists()
+
+
+@pytest.mark.parametrize(("name", "handle"), [
+    ("Belgian candi sugar", CANDI), ("Light DME", DME), ("brown sugar", CANDI), ("Dextrose", CANDI),
+])
+def test_sugars_that_are_not_staples_are_still_listed(ctx, name, handle):
+    order = build_order_list_impl(ctx, Session(), [_item(name, 500, "g", handle, 1, "other")])
+    assert [line.ingredient_name for line in order.items] == [name]
+    assert order.left_out == [] and "Left out" not in order.text
+
+
+def test_left_out_note_comes_from_the_parse_even_when_the_model_omits_the_staple(ctx):
+    # Issue #14: the note is code, not model text; staples are named once, in recipe order.
+    session = Session(parsed_recipe=[
+        Ingredient(type="fermentable", name="Maris Otter", amount=5, unit="kg"),
+        Ingredient(type="other", name="Cane sugar", amount=300, unit="g", timing="5 min"),
+        Ingredient(type="other", name="Table sugar (Domino)", amount=100, unit="g"),
+        Ingredient(type="other", name="cane sugar", amount=100, unit="g", timing="0 min"),
+    ])
+    order = build_order_list_impl(ctx, session, [_item("Maris Otter", 5, "kg", MO_100G, 50)])
+    assert order.left_out == ["cane sugar", "table sugar"]
+    assert "\nLeft out, assumed on hand: cane sugar, table sugar\n" in order.text
+    assert order.text.index("Left out") < order.text.index("Total:")
+
+
+def test_left_out_note_also_covers_a_staple_only_the_model_sent(ctx):
+    staple = _item("White sugar", 200, "g", CANDI, 1, "other")
+    order = build_order_list_impl(ctx, Session(), [_item("Maris Otter", 5, "kg", MO_100G, 50), staple])
+    assert order.left_out == ["white sugar"]
+    assert [line.ingredient_name for line in order.items] == ["Maris Otter"]

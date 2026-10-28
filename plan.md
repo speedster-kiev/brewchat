@@ -132,7 +132,7 @@ Tests:
 
 ### Step 4: Tools, models, order list, logs
 
-Files: `brewchat/agent/models.py`, `tools.py`, `brewchat/logs/substitution_log.py`, `session_log.py`, `export.py`, `scripts/export_logs.py`, `tests/test_tools.py`, `test_order_list.py`, `test_substitution_log.py`, `test_session_log.py`.
+Files: `brewchat/agent/models.py`, `tools.py`, `brewchat/telemetry/substitution_log.py`, `session_log.py`, `export.py`, `scripts/export_logs.py`, `tests/test_tools.py`, `test_order_list.py`, `test_substitution_log.py`, `test_session_log.py`.
 
 - `models.py`: Pydantic models straight from spec "Data schemas": `Ingredient`, `Substitution`, `OrderListItem`, `OrderList` (items, total, currency, vat_note, cache_timestamp, handoff_note). Validation: `substitution` required iff `source in {substituted, user_override}`; `product_handle` required unless `source == unavailable`.
 - `tools.py`: three `@beta_tool` functions taking the Pydantic-shaped inputs. `submit_parsed_recipe` validates and stores the parse on the session (a checkpoint, returns the count). `search_catalog` wraps step 3. `build_order_list` builds URLs (`base_url + handle`), computes the total from the configured VAT flag, stamps `cache_timestamp`, renders the plain-text list, writes substitution-log records and bumps the session log, and returns both the structured `OrderList` and the text. Tool functions get the session via a contextvar set by the runner.

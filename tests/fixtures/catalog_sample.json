@@ -1,5 +1,5 @@
 {
- "amount": 52,
+ "amount": 54,
  "productIds": [
   101,
   102,
@@ -35,6 +35,7 @@
   212,
   213,
   214,
+  215,
   301,
   302,
   303,
@@ -42,6 +43,7 @@
   305,
   306,
   307,
+  308,
   401,
   402,
   403,
@@ -1288,6 +1290,37 @@
    "PacketId": null
   },
   {
+   "Id": 215,
+   "ItemNumber": "HC-0215",
+   "Title": "Hallertauer Mittelfrüh hop pellets, 100 g, alpha 4,0%",
+   "CategoryId": 53,
+   "SecondaryCategoryIds": [
+    "7"
+   ],
+   "CategoryTitle": "Europaeiske humler",
+   "Stock": 15,
+   "StockWithoutReservation": 15,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 42.0,
+     "PriceMinWithVat": 42.0,
+     "PriceMinWithoutVat": 33.6,
+     "FullPriceMinWithVat": 42.0,
+     "FullPriceMinWithoutVat": 33.6
+    }
+   ],
+   "Handle": "/shop/53-europaeiske-humler/215-hallertauer-mittelfrueh-hop-pellets-100-g-alpha-4-0/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
    "Id": 301,
    "ItemNumber": "HC-0301",
    "Title": "Fermentis - SafAle US-05, 11,5 g. dry yeast",
@@ -1498,6 +1531,37 @@
     }
    ],
    "Handle": "/shop/8-gaer/307-fermentis-saflager-w-34-70-11-5-g-dry-yeast/",
+   "Link": null,
+   "Url": null,
+   "DateCreated": "2025-01-01T00:00:00",
+   "VatGroupId": 1,
+   "PacketId": null
+  },
+  {
+   "Id": 308,
+   "ItemNumber": "HC-0308",
+   "Title": "Fermentis - SafLager S-23, 11,5 g. dry yeast",
+   "CategoryId": 8,
+   "SecondaryCategoryIds": [
+    "78"
+   ],
+   "CategoryTitle": "Gaer",
+   "Stock": 20,
+   "StockWithoutReservation": 20,
+   "Soldout": false,
+   "Buyable": true,
+   "Online": false,
+   "Prices": [
+    {
+     "Amount": 1,
+     "PriceMin": 45.0,
+     "PriceMinWithVat": 45.0,
+     "PriceMinWithoutVat": 36.0,
+     "FullPriceMinWithVat": 45.0,
+     "FullPriceMinWithoutVat": 36.0
+    }
+   ],
+   "Handle": "/shop/8-gaer/308-fermentis-saflager-s-23-11-5-g-dry-yeast/",
    "Link": null,
    "Url": null,
    "DateCreated": "2025-01-01T00:00:00",
