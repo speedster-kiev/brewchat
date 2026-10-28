@@ -325,9 +325,12 @@ def test_d7_staple_skipped_but_candi_sugar_listed():
     assert not evals.evaluate_fixture(fx, [turn("Pilsner malt")]).passed
     assert not evals.evaluate_fixture(fx, [turn("Pilsner malt", "Belgian candi sugar", text="")]).passed
     assert not evals.evaluate_fixture(fx, [turn("Pilsner malt", "Belgian candi sugar", calls=(PARSE_CALL,))]).passed
-    staple_search = {"name": "search_catalog", "input": {"query": "Cane sugar"}}
+    refused = {"name": "search_catalog", "input": {"query": "Cane sugar"}}  # search_catalog refuses it in code
+    assert evals.evaluate_fixture(
+        fx, [turn("Pilsner malt", "Belgian candi sugar", calls=(parse, refused))]).passed
+    leaked = {"name": "search_catalog", "input": {"query": "cane sugar substitute"}}
     assert not evals.evaluate_fixture(
-        fx, [turn("Pilsner malt", "Belgian candi sugar", calls=(parse, staple_search))]).passed
+        fx, [turn("Pilsner malt", "Belgian candi sugar", calls=(parse, leaked))]).passed
 
 
 def test_judge_verdict_parsing():

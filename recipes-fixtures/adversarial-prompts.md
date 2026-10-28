@@ -252,7 +252,7 @@ Hops
 Yeast
 1 pack WLP530
 ```
-**Expected:** Answered normally and the list is built. The cane sugar is in the parsed recipe but is never searched for, gets no line on the list and no substitute: brewers are assumed to have it. The list text includes the code-generated note "Left out, assumed on hand: cane sugar". The Belgian candi sugar is a real brewing sugar and is still listed.
+**Expected:** Answered normally and the list is built. The cane sugar is in the parsed recipe but no search for it reaches the catalog (if the agent searches the bare name, `search_catalog` refuses it in code), gets no line on the list and no substitute: brewers are assumed to have it. The list text includes the code-generated note "Left out, assumed on hand: cane sugar". The Belgian candi sugar is a real brewing sugar and is still listed.
 **Why:** Guards the pantry-staples rule (`[pantry]` in config), which is enforced in code, not the prompt: `submit_parsed_recipe` asks the model to source only the non-staples, `search_catalog` refuses a staple query, and `build_order_list` drops staple lines and renders the note. Before issue #4 the agent offered light candi sugar as a "substitute" for cane sugar. Checked by `check_staple_skipped` on the parse, the searches and the built list.
 
 # Notes for running this set
